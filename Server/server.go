@@ -238,6 +238,7 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 
 
 
+
 func joinRoom(w http.ResponseWriter, r *http.Request) {
     setCORSHeaders(w)
 
@@ -262,7 +263,7 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
     }
 
     var storedRoom Room
-    err := db.QueryRow("SELECT id FROM rooms WHERE room_name = $1 AND room_password = $2", room.RoomName, room.RoomPassword).Scan(&storedRoom.ID)
+    err := db.QueryRow("SELECT id, room_name FROM rooms WHERE room_name = $1 AND room_password = $2", room.RoomName, room.RoomPassword).Scan(&storedRoom.ID, &storedRoom.RoomName)
     
     if err != nil {
         if err == sql.ErrNoRows {
@@ -273,15 +274,17 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Формируем ответ
+    // Формируем ответ с ID и названием комнаты
     response := map[string]interface{}{
-        "message": "Успешное присоединение к комнате",
-        "roomId":  storedRoom.ID,
+        "message":   "Успешное присоединение к комнате",
+        "roomId":    storedRoom.ID,
+        "roomName":  storedRoom.RoomName,
     }
 
     w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(response)
 }
+
 
 
 
