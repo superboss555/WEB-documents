@@ -71,8 +71,6 @@
 
 
     <script>
-        let userId = null
-
         async function loginUser(event) {
             event.preventDefault() // Предотвратить стандартное поведение формы
 
@@ -83,8 +81,6 @@
                 email: email,
                 password: password
             }
-
-            console.log("Sending login data:", userData) // Для отладки
 
             try {
                 const response = await fetch("http://localhost:8080/login", {
@@ -97,19 +93,26 @@
 
                 if (response.ok) {
                     const data = await response.json()
-                    alert(data.message) // Сообщение об успешном входе
-                    userId = data.userId // Сохраняем ID пользователя
-                    window.location.href = "account.html" // Перенаправление на страницу аккаунта
+
+                    // Записываем данные пользователя в localStorage
+                    const userObject = {
+                        id: data.userId,
+                        email: data.email
+                    }
+                    localStorage.setItem("user", JSON.stringify(userObject))
+
+                    alert("Успешный вход: " + data.message)
+
+                    // Перенаправление на страницу аккаунта
+                    window.location.href = "account.html"
                 } else {
                     const errorMsg = await response.text()
-                    alert("Ошибка входа: " + errorMsg) // Показать сообщение об ошибке
+                    alert("Ошибка входа: " + errorMsg)
                 }
             } catch (error) {
-                alert("Ошибка сети: " + error.message) // Показать сообщение об ошибке сети
-                console.error("Network error:", error) // Логирование ошибки в консоль
+                alert("Ошибка сети: " + error.message)
             }
         }
-
     </script>
 </body>
 

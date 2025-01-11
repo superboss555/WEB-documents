@@ -66,6 +66,8 @@
 
 <body>
     <h1>Ваш аккаунт</h1>
+    <div id="user-info"></div>
+
     <a href="createRoom.html" class="button" id="createRoomLink">Создать комнату</a>
     <a href="joinRoom.html" class="button" id="joinRoomLink">Присоединиться к комнате</a>
 
@@ -81,6 +83,17 @@
         document.getElementById('joinRoomLink').addEventListener('click', function (event) {
             event.preventDefault() // Отменяем стандартное поведение ссылки
             window.location.href = 'joinRoom.html' // Переход на новую страницу
+        })
+
+        // получение id
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = JSON.parse(localStorage.getItem("user"))
+            if (user) {
+                document.getElementById("user-info").innerText = `ID: ${user.id}, Email: ${user.email}`
+            } else {
+                alert("Пользователь не авторизован.")
+                window.location.href = "index.html"
+            }
         });
     </script>
 </body>

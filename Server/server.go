@@ -127,7 +127,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
     setCORSHeaders(w)
 
     if r.Method == http.MethodOptions {
-        return // Обработка preflight-запроса
+        return
     }
 
     if r.Method != http.MethodPost {
@@ -141,15 +141,14 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    log.Printf("Received login data: %+v", user)
-
     if user.Email == "" || user.Password == "" {
         http.Error(w, "Email и пароль не могут быть пустыми", http.StatusBadRequest)
         return
     }
 
-    var storedHash string
-    err := db.QueryRow("SELECT password FROM users WHERE email = $1", user.Email).Scan(&storedHash)
+    var storedUser User
+    err := db.QueryRow("SELECT id, email, password FROM users WHERE email = $1", user.Email).Scan(
+        &storedUser.ID, &storedUser.Email, &storedUser.Password)
     if err != nil {
         if err == sql.ErrNoRows {
             http.Error(w, "Неверный Email или пароль", http.StatusUnauthorized)
@@ -160,17 +159,22 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
     }
 
     // Сравниваем хэш пароля
-    err = bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(user.Password))
+    err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
     if err != nil {
         http.Error(w, "Неверный Email или пароль", http.StatusUnauthorized)
         return
     }
 
-    response := map[string]string{"message": "Успешный вход в аккаунт", "redirect": "/dashboard"}
+    // Формируем ответ
+    response := map[string]interface{}{
+        "message": "Успешный вход в систему",
+        "userId":  storedUser.ID,
+        "email":   storedUser.Email,
+    }
+
     w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(response)
 }
-
 
 func handleConnection(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -197,7 +201,9 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
+func serveAccount(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "account.html") 
+}
 
 func main() {
 	initDB()                     
@@ -213,8 +219,4 @@ func main() {
 
 	log.Println("Сервер запущен на порту 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil)) // Запуск HTTP-сервера
-}
-
-func serveAccount(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "account.html") 
 }
