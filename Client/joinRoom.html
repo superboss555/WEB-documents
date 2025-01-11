@@ -71,9 +71,19 @@
             const roomName = document.getElementById("roomName").value;
             const roomPassword = document.getElementById("roomPassword").value;
 
+            // Извлекаем ID пользователя из localStorage
+            const user = JSON.parse(localStorage.getItem("user"));
+            
+            if (!user || !user.id) {
+                alert("Пользователь не авторизован.");
+                window.location.href = "index.html"; // Перенаправление на страницу входа
+                return;
+            }
+
             const roomData = {
                 room_name: roomName,
-                room_password: roomPassword
+                room_password: roomPassword,
+                user_id: user.id // Передаем ID пользователя
             };
 
             try {
@@ -88,14 +98,6 @@
                 if (response.ok) {
                     const data = await response.json();
                     alert("Вы успешно присоединились к комнате! ID комнаты: " + data.roomId);
-
-                    // Сохранение данных о комнате в localStorage
-                    const currentRoomData = {
-                        name: data.roomName,
-                        id: data.roomId
-                    };
-                    localStorage.setItem("currentRoom", JSON.stringify(currentRoomData));
-
                     window.location.href = "room.html"; // Перенаправление на страницу комнаты
                 } else {
                     const errorMsg = await response.text();

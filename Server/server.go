@@ -246,10 +246,10 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Добавление записи в таблицу room_users
+    // Добавление записи в таблицу room_users с ролью "owner"
     _, err = db.Exec(
         "INSERT INTO room_users(room_id, user_id, role) VALUES($1, $2, $3)",
-        room.ID, room.UserID, "владелец",
+        room.ID, room.UserID, "owner", // Роль на английском языке
     )
     
     if err != nil {
@@ -281,7 +281,12 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var room Room
+    var room struct {
+        RoomName     string `json:"room_name"`
+        RoomPassword string `json:"room_password"`
+        UserID       int    `json:"user_id"` // Получаем ID пользователя из запроса
+    }
+
     if err := json.NewDecoder(r.Body).Decode(&room); err != nil {
         http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
         return
@@ -293,7 +298,11 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
     }
 
     // Проверка существования комнаты
-    var storedRoom Room
+    var storedRoom struct {
+        ID   int
+        Name string
+    }
+    
     err := db.QueryRow("SELECT id FROM rooms WHERE room_name = $1 AND room_password = $2", room.RoomName, room.RoomPassword).Scan(&storedRoom.ID)
     
     if err != nil {
@@ -305,27 +314,13 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Проверка существования пользователя
-    var userExists bool
-    err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)", room.UserID).Scan(&userExists)
-
-    if err != nil {
-        http.Error(w, "Ошибка проверки пользователя: "+err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    if !userExists {
-        http.Error(w, "Пользователь не найден", http.StatusUnauthorized)
-        return
-    }
-
     // Проверка на существование записи в таблице room_users
     var userInRoomID int
     err = db.QueryRow("SELECT user_id FROM room_users WHERE room_id = $1 AND user_id = $2", storedRoom.ID, room.UserID).Scan(&userInRoomID)
 
     if err == sql.ErrNoRows {
-        // Если записи нет, добавляем нового пользователя в комнату
-        _, err = db.Exec("INSERT INTO room_users(room_id, user_id, role) VALUES($1, $2, $3)", storedRoom.ID, room.UserID, "")
+        // Если записи нет, добавляем нового пользователя в комнату с ролью "reader"
+        _, err = db.Exec("INSERT INTO room_users(room_id, user_id, role) VALUES($1, $2, $3)", storedRoom.ID, room.UserID, "reader")
         if err != nil {
             http.Error(w, "Ошибка при добавлении пользователя в комнату: "+err.Error(), http.StatusInternalServerError)
             return
@@ -340,12 +335,14 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
     response := map[string]interface{}{
         "message":   "Успешное присоединение к комнате",
         "roomId":    storedRoom.ID,
-        "roomName":  storedRoom.RoomName,
+        "roomName":  storedRoom.Name,
     }
 
     w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(response)
 }
+
+
 
 
 
