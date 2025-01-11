@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Комната</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .button {
+            background-color: #5cb85c; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 20px; 
+            transition: background-color 0.3s; 
+        }
+
+        .button:hover {
+            background-color: #4cae4c; 
+        }
+    </style>
+</head>
+<body>
+    <h1 id="roomName">Название комнаты</h1>
+
+    <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
+
+    <script>
+        function leaveRoom() {
+            window.location.href = "account.html"; // Перенаправление на страницу аккаунта
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const room = JSON.parse(localStorage.getItem("currentRoom"));
+            if (room && room.name) {
+                document.getElementById("roomName").innerText = room.name; // Устанавливаем название комнаты
+            } else {
+                alert("Не удалось загрузить информацию о комнате.");
+                window.location.href = "account.html"; // Перенаправление на страницу аккаунта
+            }
+        });
+    </script>
+</body>
+</html>

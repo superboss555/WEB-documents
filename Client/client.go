@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os/exec"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -26,11 +25,5 @@ func main() {
 	}
 	defer conn.Close()
 
-	// Бесконечный цикл для поддержания работы клиента
-	for {
-		time.Sleep(1 * time.Second) 
-	}
+	log.Println("Подключение к WebSocket-серверу установлено")	
 }
-
-
-

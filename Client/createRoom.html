@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать комнату</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin: 20px 0;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 300px; /* Ширина формы */
+        }
+
+        input {
+            margin: 10px 0; /* Отступы между полями ввода */
+            padding: 10px;
+            border: 1px solid #ccc; /* Рамка полей ввода */
+            border-radius: 4px; /* Скругление углов */
+            font-size: 16px; /* Размер шрифта */
+        }
+
+        .button {
+            background-color: #5cb85c; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 20px; 
+            transition: background-color 0.3s; 
+        }
+
+        .button:hover {
+            background-color: #4cae4c; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Создать комнату</h1>
+    <form id="create-room-form" onsubmit="createRoom(event)">
+        <label for="roomName">Название комнаты:</label>
+        <input type="text" id="roomName" placeholder="Введите название" required>
+
+        <label for="roomPassword">Пароль (необязательно):</label>
+        <input type="password" id="roomPassword" placeholder="Введите пароль (если требуется)">
+
+        <button type="submit" class="button">Создать комнату</button>
+    </form>
+
+    <script>
+        async function createRoom(event) {
+            event.preventDefault(); // Предотвратить стандартное поведение формы
+
+            const roomName = document.getElementById("roomName").value;
+            const roomPassword = document.getElementById("roomPassword").value;
+
+            // Извлекаем ID пользователя из localStorage
+            const user = JSON.parse(localStorage.getItem("user"));
+            
+            if (!user) {
+                alert("Пользователь не авторизован.");
+                window.location.href = "index.html"; // Перенаправление на страницу входа
+                return;
+            }
+
+            const roomData = {
+                user_id: user.id, // Используем ID пользователя из localStorage
+                room_name: roomName,
+                room_password: roomPassword
+            };
+
+            try {
+                const response = await fetch("http://localhost:8080/createRoom", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(roomData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert("Комната успешно создана! ID комнаты: " + data.roomId);
+                    window.location.href = "room.html"; 
+                } else {
+                    const errorMsg = await response.text();
+                    alert("Ошибка создания комнаты: " + errorMsg);
+                }
+            } catch (error) {
+                alert("Ошибка сети: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
