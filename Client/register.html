@@ -83,7 +83,9 @@
 
                 if (response.ok) {
                     alert("Пользователь успешно зарегистрирован.")
+
                     window.location.href = "index.html"
+
                 } else {
                     const errorMsg = await response.text()
                     alert("Ошибка регистрации: " + errorMsg)

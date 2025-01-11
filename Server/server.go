@@ -26,7 +26,6 @@ type User struct {
 }
 
 
-
 func initDB() {
 	var err error
 	connStr := "host=localhost user=admin password=123 dbname=test port=5432 sslmode=disable"
@@ -124,7 +123,6 @@ func createUser(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(response)
 }
 
-
 func loginUser(w http.ResponseWriter, r *http.Request) {
     setCORSHeaders(w)
 
@@ -150,9 +148,8 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Получаем ID и хэш пароля из базы данных
     var storedHash string
-    err := db.QueryRow("SELECT id, password FROM users WHERE email = $1", user.Email).Scan(&user.ID, &storedHash)
+    err := db.QueryRow("SELECT password FROM users WHERE email = $1", user.Email).Scan(&storedHash)
     if err != nil {
         if err == sql.ErrNoRows {
             http.Error(w, "Неверный Email или пароль", http.StatusUnauthorized)
@@ -169,7 +166,9 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    response := map[string]string{"message": "Успешный вход в аккаунт", "redirect": "/dashboard"}
     w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(response)
 }
 
 
@@ -217,5 +216,5 @@ func main() {
 }
 
 func serveAccount(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "D:/projects/webDocuments/Client/account.html") 
+    http.ServeFile(w, r, "account.html") 
 }
