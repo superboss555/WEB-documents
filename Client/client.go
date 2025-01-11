@@ -10,7 +10,6 @@ import (
 func main() {
 	// Открываем HTML-страницу регистрации в браузере
 	err := exec.Command("cmd", "/c", "start", "index.html").Start() // Для Windows
-	// err := exec.Command("open", "index.html").Start() // Для macOS
 	if err != nil {
 		log.Fatal("Ошибка открытия браузера:", err)
 	}

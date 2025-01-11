@@ -88,7 +88,15 @@
                 if (response.ok) {
                     const data = await response.json();
                     alert("Вы успешно присоединились к комнате! ID комнаты: " + data.roomId);
-                    window.location.href = "room.html"; // Перенаправление на страницу аккаунта
+
+                    // Сохранение данных о комнате в localStorage
+                    const currentRoomData = {
+                        name: data.roomName,
+                        id: data.roomId
+                    };
+                    localStorage.setItem("currentRoom", JSON.stringify(currentRoomData));
+
+                    window.location.href = "room.html"; // Перенаправление на страницу комнаты
                 } else {
                     const errorMsg = await response.text();
                     alert("Ошибка присоединения к комнате: " + errorMsg);
