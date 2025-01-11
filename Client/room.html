@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +10,24 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
 
         h1 {
@@ -22,41 +35,147 @@
             color: #333;
         }
 
+        form {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        textarea {
+            width: 80%;
+            height: 400px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+        }
+
         .button {
-            background-color: #5cb85c; 
-            color: white; 
-            padding: 15px 30px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-size: 20px; 
-            transition: background-color 0.3s; 
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s;
         }
 
         .button:hover {
-            background-color: #4cae4c; 
+            background-color: #4cae4c;
+        }
+
+        .access-control {
+            display: flex;
+            align-items: center;
+            margin-block: 30px;
+            gap: 10px;
+        }
+
+        .access-control input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
     </style>
 </head>
-<body>
-    <h1 id="roomName">Название комнаты</h1>
 
-    <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
+<body>
+
+    <header>
+        <select name="documentVersion" id="documentVersion">
+            <option value="1">Версия 1</option>
+            <option value="2">Версия 2</option>
+            <option value="3">Версия 3</option>
+        </select>
+
+        <h1>Название комнаты: <span id="roomName"></span></h1>
+
+        <table id="usersTable">
+            <tr>
+                <th>Пользователь</th>
+                <th>Роль</th>
+            </tr>
+
+            <tr>
+                <td>admin@main.ru</td>
+                <td>
+                    Владелец
+                </td>
+            </tr>
+            <tr>
+                <td class="userName">saka@main.ru</td>
+                <td>
+                    <select class="userRole" name="" id="">
+                        <option value="reader">Читатель</option>
+                        <option value="editor">Редактор</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="userName">ddubinkin@main.ru</td>
+                <td>
+                    <select class="userRole" name="" id="">
+                        <option value="reader">Читатель</option>
+                        <option value="editor">Редактор</option>
+                    </select>
+                </td>
+            </tr>
+
+        </table>
+
+    </header>
+
+    <main>
+        <form action="" method="post">
+            <textarea id="documentContent" placeholder="Введите текст документа..."></textarea>
+            <button id="saveButton" type="submit" class="button" onclick="saveDocument()">Сохранить документ</button>
+        </form>
+        <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
+    </main>
+
+
+
+
+
+
+
+    <!-- <h2>Список пользователей</h2>
+
+    <ul id="userList">
+        <li>ddubinkin@example.com</li>
+        <li>ddubinkin2@main.ru</li>
+    </ul>
+
+    <h3>Управление доступом</h3>
+    <div class="access-control">
+        <input type="email" id="accessEmail" placeholder="Введите email" required>
+        <button class="button" onclick="grantAccess()">Резрешить доступ</button>
+        <button class="button" onclick="denyAccess()">Запретить доступ</button>
+    </div> -->
+
+
+
 
     <script>
         function leaveRoom() {
-            window.location.href = "account.html"; // Перенаправление на страницу аккаунта
+            window.location.href = "account.html" // Перенаправление на страницу аккаунта
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            const room = JSON.parse(localStorage.getItem("currentRoom"));
+            const room = JSON.parse(localStorage.getItem("currentRoom"))
             if (room && room.name) {
-                document.getElementById("roomName").innerText = room.name; // Устанавливаем название комнаты
+                document.getElementById("roomName").innerText = room.name // Устанавливаем название комнаты
             } else {
-                alert("Не удалось загрузить информацию о комнате.");
-                window.location.href = "account.html"; // Перенаправление на страницу аккаунта
+                alert("Не удалось загрузить информацию о комнате.")
+                window.location.href = "account.html" // Перенаправление на страницу аккаунта
             }
         });
     </script>
 </body>
+
 </html>
