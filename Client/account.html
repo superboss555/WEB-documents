@@ -47,7 +47,7 @@
     <h1>Ваш аккаунт</h1>
     <a href="createRoom.html" class="button" id="createRoomLink">Создать комнату</a>
     <a href="joinRoom.html" class="button" id="joinRoomLink">Присоединиться к комнате</a>
-    <a href="myRooms.html" class="button" id="myRoomsLink">Мои комнаты</a> <!-- Новая кнопка -->
+    
 
     <script>
         // Добавляем слушатель событий для ссылки "Создать комнату"
@@ -60,12 +60,6 @@
         document.getElementById('joinRoomLink').addEventListener('click', function(event) {
             event.preventDefault(); // Отменяем стандартное поведение ссылки
             window.location.href = 'joinRoom.html'; // Переход на новую страницу
-        });
-
-        // Добавляем слушатель событий для ссылки "Мои комнаты"
-        document.getElementById('myRoomsLink').addEventListener('click', function(event) {
-            event.preventDefault(); // Отменяем стандартное поведение ссылки
-            window.location.href = 'myRooms.html'; // Переход на новую страницу
         });
     </script>
 </body>
