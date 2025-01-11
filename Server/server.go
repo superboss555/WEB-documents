@@ -157,6 +157,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(response)
 }
 
+
+
 func loginUser(w http.ResponseWriter, r *http.Request) {
     setCORSHeaders(w)
 
