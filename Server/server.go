@@ -29,7 +29,7 @@ type User struct {
 
 func initDB() {
 	var err error
-	connStr := "host=localhost user=admin password=123 dbname=doc port=5432 sslmode=disable"
+	connStr := "host=localhost user=admin password=123 dbname=test port=5432 sslmode=disable"
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Ошибка подключения к базе данных:", err)
@@ -38,8 +38,26 @@ func initDB() {
 	if err = db.Ping(); err != nil {
 		log.Fatal("Ошибка пинга базы данных:", err)
 	}
+
+	createUsersTable()
 }
 
+func createUsersTable() {
+    query := `
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL
+    );
+    `
+    
+    _, err := db.Exec(query)
+    if err != nil {
+        log.Fatal("Ошибка при создании таблицы пользователей:", err)
+    } else {
+        log.Println("Таблица пользователей успешно создана или уже существует.")
+    }
+}
 
 func userExists(email string) bool {
 	var exists bool
@@ -155,9 +173,6 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 }
 
 
-
-
-
 func handleConnection(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -194,8 +209,13 @@ func main() {
 	http.HandleFunc("/register", createUser) 
 	http.HandleFunc("/login", loginUser)      
 	http.HandleFunc("/ws", handleConnection)   
+	http.HandleFunc("/account", serveAccount) 
 	
 
 	log.Println("Сервер запущен на порту 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil)) // Запуск HTTP-сервера
+}
+
+func serveAccount(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "D:/projects/webDocuments/Client/account.html") 
 }
