@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,45 +26,51 @@
         form {
             display: flex;
             flex-direction: column;
-            width: 300px; /* Ширина формы */
+            width: 300px;
+            /* Ширина формы */
         }
 
         input {
-            margin: 10px 0; /* Отступы между полями ввода */
+            margin: 10px 0;
+            /* Отступы между полями ввода */
             padding: 10px;
-            border: 1px solid #ccc; /* Рамка полей ввода */
-            border-radius: 4px; /* Скругление углов */
-            font-size: 16px; /* Размер шрифта */
+            border: 1px solid #ccc;
+            /* Рамка полей ввода */
+            border-radius: 4px;
+            /* Скругление углов */
+            font-size: 16px;
+            /* Размер шрифта */
         }
 
         .button {
-            background-color: #5cb85c; 
-            color: white; 
-            padding: 15px 30px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-size: 20px; 
-            transition: background-color 0.3s; 
-            margin-top: 10px; /* Отступ сверху для кнопки */
+            background-color: #5cb85c;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            /* Отступ сверху для кнопки */
         }
 
         .button:hover {
-            background-color: #4cae4c; 
+            background-color: #4cae4c;
         }
     </style>
     <script>
         async function registerUser(event) {
-            event.preventDefault(); // Предотвратить стандартное поведение формы
+            event.preventDefault() // Предотвратить стандартное поведение формы
 
-            const email = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
+            const email = document.getElementById("username").value
+            const password = document.getElementById("password").value
 
             const userData = {
                 email: email,
                 password: password
-            };
-            console.log("Sending user data: ", userData); // Добавьте эту строку для проверки
+            }
+            console.log("Sending user data: ", userData) // Добавьте эту строку для проверки
 
             try {
                 const response = await fetch("http://localhost:8080/register", {
@@ -72,21 +79,22 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify(userData)
-                });
+                })
 
                 if (response.ok) {
-                    alert("Пользователь успешно зарегистрирован.");
-                    window.location.href = "http://localhost:8080/account";
+                    alert("Пользователь успешно зарегистрирован.")
+                    window.location.href = "index.html"
                 } else {
-                    const errorMsg = await response.text();
-                    alert("Ошибка регистрации: " + errorMsg);
+                    const errorMsg = await response.text()
+                    alert("Ошибка регистрации: " + errorMsg)
                 }
             } catch (error) {
-                alert("Ошибка сети: " + error.message);
+                alert("Ошибка сети: " + error.message)
             }
         }
     </script>
 </head>
+
 <body>
     <h1>Регистрация</h1>
     <form onsubmit="registerUser(event)">
@@ -97,4 +105,5 @@
         <input type="submit" value="Зарегистрироваться">
     </form>
 </body>
+
 </html>
