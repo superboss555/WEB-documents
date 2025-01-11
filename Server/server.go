@@ -25,6 +25,15 @@ type User struct {
 	Password string `json:"password"`
 }
 
+type Room struct {
+    ID          int64  `json:"id"`
+    UserID      int64  `json:"user_id"`      // ID пользователя, создавшего комнату
+    RoomID      int64  `json:"room_id"`      // Уникальный идентификатор комнаты
+    RoomName    string `json:"room_name"`     // Название комнаты
+    RoomPassword string `json:"room_password"` // Пароль для входа (если требуется)
+}
+
+
 
 func initDB() {
 	var err error
@@ -38,25 +47,29 @@ func initDB() {
 		log.Fatal("Ошибка пинга базы данных:", err)
 	}
 
-	createUsersTable()
+    initRoomsTable()
 }
 
-func createUsersTable() {
+func initRoomsTable() {
     query := `
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS rooms (
         id SERIAL PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL
+        user_id INT NOT NULL,
+        room_id SERIAL UNIQUE NOT NULL,
+        room_name VARCHAR(255) NOT NULL,
+        room_password VARCHAR(255),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
     `
     
     _, err := db.Exec(query)
     if err != nil {
-        log.Fatal("Ошибка при создании таблицы пользователей:", err)
+        log.Fatal("Ошибка при создании таблицы комнат:", err)
     } else {
-        log.Println("Таблица пользователей успешно создана или уже существует.")
+        log.Println("Таблица комнат успешно создана или уже существует.")
     }
 }
+
 
 func userExists(email string) bool {
 	var exists bool
@@ -176,34 +189,134 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(response)
 }
 
+
+func createRoom(w http.ResponseWriter, r *http.Request) {
+    setCORSHeaders(w)
+
+    if r.Method == http.MethodOptions {
+        return // Обработка preflight-запроса
+    }
+
+    if r.Method != http.MethodPost {
+        http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+        return
+    }
+
+    var room Room
+    if err := json.NewDecoder(r.Body).Decode(&room); err != nil {
+        http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    // Проверка обязательных полей
+    if room.UserID == 0 || room.RoomName == "" {
+        http.Error(w, "ID пользователя и название комнаты не могут быть пустыми", http.StatusBadRequest)
+        return
+    }
+
+    // Вставка данных в таблицу rooms
+    err := db.QueryRow(
+        "INSERT INTO rooms(user_id, room_name, room_password) VALUES($1, $2, $3) RETURNING id",
+        room.UserID, room.RoomName, room.RoomPassword,
+    ).Scan(&room.ID)
+
+    if err != nil {
+        http.Error(w, "Ошибка при создании комнаты: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    response := map[string]interface{}{
+        "message":   "Комната успешно создана",
+        "roomId":    room.ID,
+        "roomName":  room.RoomName,
+        "userId":    room.UserID,
+    }
+
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(response)
+}
+
+
+
+func joinRoom(w http.ResponseWriter, r *http.Request) {
+    setCORSHeaders(w)
+
+    if r.Method == http.MethodOptions {
+        return // Обработка preflight-запроса
+    }
+
+    if r.Method != http.MethodPost {
+        http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+        return
+    }
+
+    var room Room
+    if err := json.NewDecoder(r.Body).Decode(&room); err != nil {
+        http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    if room.RoomName == "" || room.RoomPassword == "" {
+        http.Error(w, "Название комнаты и пароль не могут быть пустыми", http.StatusBadRequest)
+        return
+    }
+
+    var storedRoom Room
+    err := db.QueryRow("SELECT id FROM rooms WHERE room_name = $1 AND room_password = $2", room.RoomName, room.RoomPassword).Scan(&storedRoom.ID)
+    
+    if err != nil {
+        if err == sql.ErrNoRows {
+            http.Error(w, "Комната не найдена или неверный пароль", http.StatusUnauthorized)
+            return
+        }
+        http.Error(w, "Ошибка получения данных: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Формируем ответ
+    response := map[string]interface{}{
+        "message": "Успешное присоединение к комнате",
+        "roomId":  storedRoom.ID,
+    }
+
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(response)
+}
+
+
+
+
 func handleConnection(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("Ошибка при установке соединения:", err)
-		return
-	}
-	defer conn.Close()
+    conn, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        log.Println("Ошибка при установке соединения:", err)
+        return
+    }
+    defer func() {
+        if err := conn.Close(); err != nil {
+            log.Println("Ошибка при закрытии соединения:", err)
+        }
+    }()
 
-	for {
-		messageType, msg, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Ошибка:", err)
-			break
-		}
+    for {
+        messageType, msg, err := conn.ReadMessage()
+        if err != nil {
+            log.Println("Ошибка чтения сообщения:", err)
+            break // Выход из цикла при ошибке
+        }
 
-		log.Printf("Получено сообщение: %s\n", msg)
+        log.Printf("Получено сообщение: %s\n", msg)
 
-		err = conn.WriteMessage(messageType, msg) // Эхо-ответ (если нужно)
-		if err != nil {
-			log.Println("Ошибка:", err)
-			break
-		}
-	}
+        // Эхо-ответ (если нужно)
+        if err := conn.WriteMessage(messageType, msg); err != nil {
+            log.Println("Ошибка отправки сообщения:", err)
+            break // Выход из цикла при ошибке
+        }
+    }
 }
 
-func serveAccount(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "account.html") 
-}
+
+
 
 func main() {
 	initDB()                     
@@ -215,8 +328,15 @@ func main() {
 	http.HandleFunc("/login", loginUser)      
 	http.HandleFunc("/ws", handleConnection)   
 	http.HandleFunc("/account", serveAccount) 
+    http.HandleFunc("/createRoom", createRoom)
+    http.HandleFunc("/joinRoom", joinRoom)
+
 	
 
 	log.Println("Сервер запущен на порту 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil)) // Запуск HTTP-сервера
+}
+
+func serveAccount(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "account.html") 
 }
