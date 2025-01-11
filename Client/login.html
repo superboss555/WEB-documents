@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin: 20px 0;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 300px; /* Ширина формы */
+        }
+
+        input {
+            margin: 10px 0; /* Отступы между полями ввода */
+            padding: 10px;
+            border: 1px solid #ccc; /* Рамка полей ввода */
+            border-radius: 4px; /* Скругление углов */
+            font-size: 16px; /* Размер шрифта */
+        }
+
+        .button {
+            background-color: #5cb85c; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 20px; 
+            transition: background-color 0.3s; 
+            margin-top: 10px; /* Отступ сверху для кнопки */
+        }
+
+        .button:hover {
+            background-color: #4cae4c; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Вход в систему</h1>
+    <form id="login-form" onsubmit="loginUser(event)">
+        <input type="text" id="username" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Пароль" required>
+        <button type="submit" class="button">Войти</button>
+    </form>
+
+    <script>
+        let userId = null;
+
+        async function loginUser(event) {
+            event.preventDefault(); // Предотвратить стандартное поведение формы
+
+            const email = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const userData = {
+                email: email,
+                password: password
+            };
+            
+            console.log("Sending login data:", userData); // Для отладки
+
+            try {
+                const response = await fetch("http://localhost:8080/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message); // Сообщение об успешном входе
+                    userId = data.userId; // Сохраняем ID пользователя
+                    window.location.href = "http://localhost:8080/account"; // Перенаправление на страницу аккаунта
+                } else {
+                    const errorMsg = await response.text();
+                    alert("Ошибка входа: " + errorMsg); // Показать сообщение об ошибке
+                }
+            } catch (error) {
+                alert("Ошибка сети: " + error.message); // Показать сообщение об ошибке сети
+                console.error("Network error:", error); // Логирование ошибки в консоль
+            }
+        }
+    </script>
+</body>
+</html>

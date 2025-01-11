@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        async function registerUser(event) {
+            event.preventDefault(); // Предотвратить стандартное поведение формы
+
+            const email = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const userData = {
+                email: email,
+                password: password
+            };
+            console.log("Sending user data: ", userData); // Добавьте эту строку для проверки
+
+            try {
+                const response = await fetch("http://localhost:8080/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    alert("Пользователь успешно зарегистрирован.");
+                    window.location.href = "http://localhost:8080/home";
+                } else {
+                    const errorMsg = await response.text();
+                    alert("Ошибка регистрации: " + errorMsg);
+                }
+            } catch (error) {
+                alert("Ошибка сети: " + error.message);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Регистрация</h1>
+    <form onsubmit="registerUser(event)">
+        <label for="username">Email:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Пароль:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="submit" value="Зарегистрироваться">
+    </form>
+</body>
+</html>

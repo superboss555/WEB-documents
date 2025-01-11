@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аккаунт</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column; /* Изменяем направление на колонку */
+            justify-content: center; /* Центрируем по вертикали */
+            align-items: center; /* Центрируем по горизонтали */
+            height: 100vh; /* Высота на весь экран */
+        }
+
+        h1 {
+            margin: 20px 0; /* Вертикальные отступы */
+            color: #333; /* Цвет заголовка */
+        }
+
+        .button {
+            background-color: #5cb85c; /* Цвет кнопки */
+            color: white; /* Цвет текста кнопки */
+            padding: 15px 30px; /* Поля для кнопки */
+            border: none; /* Убираем границы */
+            border-radius: 6px; /* Закругляем углы */
+            cursor: pointer; /* Указатель курсора при наведении */
+            text-decoration: none; /* Убираем подчеркивание */
+            font-size: 20px; /* Размер шрифта для кнопок */
+            transition: background-color 0.3s; /* Плавный переход цвета фона при наведении */
+            margin: 15px 0; /* Отступ между кнопками */
+            width: 250px; /* Ширина кнопок */
+            text-align: center; /* Центрируем текст внутри кнопки */
+        }
+
+        .button:hover {
+            background-color: #4cae4c; /* Темнее при наведении */
+        }
+    </style>
+</head>
+<body>
+    <h1>Ваш аккаунт</h1>
+    <a href="createRoom.html" class="button" id="createRoomLink">Создать комнату</a>
+    <a href="joinRoom.html" class="button" id="joinRoomLink">Присоединиться к комнате</a>
+    <a href="myRooms.html" class="button" id="myRoomsLink">Мои комнаты</a> <!-- Новая кнопка -->
+
+    <script>
+        // Добавляем слушатель событий для ссылки "Создать комнату"
+        document.getElementById('createRoomLink').addEventListener('click', function(event) {
+            event.preventDefault(); // Отменяем стандартное поведение ссылки
+            window.location.href = 'createRoom.html'; // Переход на новую страницу
+        });
+
+        // Добавляем слушатель событий для ссылки "Присоединиться к комнате"
+        document.getElementById('joinRoomLink').addEventListener('click', function(event) {
+            event.preventDefault(); // Отменяем стандартное поведение ссылки
+            window.location.href = 'joinRoom.html'; // Переход на новую страницу
+        });
+
+        // Добавляем слушатель событий для ссылки "Мои комнаты"
+        document.getElementById('myRoomsLink').addEventListener('click', function(event) {
+            event.preventDefault(); // Отменяем стандартное поведение ссылки
+            window.location.href = 'myRooms.html'; // Переход на новую страницу
+        });
+    </script>
+</body>
+</html>
