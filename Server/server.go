@@ -392,6 +392,65 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 
 
 
+
+
+
+func main() {
+	initDB()                     
+	defer db.Close()             
+
+    clientDir := "../Client"
+    http.Handle("/", http.FileServer(http.Dir(clientDir)))
+	http.HandleFunc("/register", createUser) 
+	http.HandleFunc("/login", loginUser)      
+	http.HandleFunc("/ws", handleConnection)   
+	http.HandleFunc("/account", serveAccount) 
+    http.HandleFunc("/createRoom", createRoom)
+    http.HandleFunc("/joinRoom", joinRoom)
+
+	
+
+	log.Println("Сервер запущен на порту 8080")
+	log.Fatal(http.ListenAndServe(":8080", nil)) // Запуск HTTP-сервера
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func serveAccount(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "account.html") 
+}
+
+
+
 func handleConnection(w http.ResponseWriter, r *http.Request) {
     conn, err := upgrader.Upgrade(w, r, nil)
     if err != nil {
@@ -419,30 +478,4 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
             break // Выход из цикла при ошибке
         }
     }
-}
-
-
-
-
-func main() {
-	initDB()                     
-	defer db.Close()             
-
-    clientDir := "../Client"
-    http.Handle("/", http.FileServer(http.Dir(clientDir)))
-	http.HandleFunc("/register", createUser) 
-	http.HandleFunc("/login", loginUser)      
-	http.HandleFunc("/ws", handleConnection)   
-	http.HandleFunc("/account", serveAccount) 
-    http.HandleFunc("/createRoom", createRoom)
-    http.HandleFunc("/joinRoom", joinRoom)
-
-	
-
-	log.Println("Сервер запущен на порту 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil)) // Запуск HTTP-сервера
-}
-
-func serveAccount(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "account.html") 
 }
