@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -47,6 +48,7 @@ func initDB() {
 		log.Fatal("Ошибка пинга базы данных:", err)
 	}
 
+    // clearAllTables()
     initRoomsTable()
     initRoomUsersTable()
 }
@@ -72,24 +74,54 @@ func initRoomsTable() {
 }
 
 func initRoomUsersTable() {
+    // Запрос для добавления нового столбца email в таблицу room_users
     query := `
-    CREATE TABLE IF NOT EXISTS room_users (
-        id SERIAL PRIMARY KEY,
-        room_id INT NOT NULL,
-        user_id INT NOT NULL,
-        role VARCHAR(50),
-        FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    );
+    ALTER TABLE room_users 
+    ADD COLUMN IF NOT EXISTS email VARCHAR(255) NOT NULL;
     `
 
     _, err := db.Exec(query)
     if err != nil {
-        log.Fatal("Ошибка при создании таблицы room_users:", err)
+        log.Fatal("Ошибка при обновлении таблицы room_users:", err)
     } else {
-        log.Println("Таблица room_users успешно создана или уже существует.")
+        log.Println("Таблица room_users успешно обновлена или уже существует.")
     }
 }
+
+func clearAllTables() {
+    // Получаем список всех таблиц
+    rows, err := db.Query("SELECT tablename FROM pg_tables WHERE schemaname = 'public';")
+    if err != nil {
+        log.Fatal("Ошибка получения списка таблиц:", err)
+    }
+    defer rows.Close()
+
+    var tables []string
+    for rows.Next() {
+        var tableName string
+        if err := rows.Scan(&tableName); err != nil {
+            log.Fatal("Ошибка сканирования имени таблицы:", err)
+        }
+        tables = append(tables, tableName)
+    }
+
+    // Формируем запрос TRUNCATE для всех таблиц с сбросом идентификаторов
+    if len(tables) > 0 {
+        truncateQuery := "TRUNCATE TABLE " + strings.Join(tables, ", ") + " RESTART IDENTITY CASCADE;"
+        _, err = db.Exec(truncateQuery)
+        if err != nil {
+            log.Fatal("Ошибка очистки таблиц:", err)
+        } else {
+            log.Println("Все таблицы успешно очищены и счетчики сброшены.")
+        }
+    } else {
+        log.Println("Нет таблиц для очистки.")
+    }
+}
+
+
+
+
 
 
 func userExists(email string) bool {
@@ -237,8 +269,16 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Получаем email пользователя из таблицы users
+    var userEmail string
+    err := db.QueryRow("SELECT email FROM users WHERE id = $1", room.UserID).Scan(&userEmail)
+    if err != nil {
+        http.Error(w, "Ошибка получения email пользователя: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+
     // Вставка данных в таблицу rooms
-    err := db.QueryRow(
+    err = db.QueryRow(
         "INSERT INTO rooms(user_id, room_name, room_password) VALUES($1, $2, $3) RETURNING id",
         room.UserID, room.RoomName, room.RoomPassword,
     ).Scan(&room.ID)
@@ -248,10 +288,10 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Добавление записи в таблицу room_users с ролью "owner"
+    // Добавление записи в таблицу room_users с ролью "owner" и email пользователя
     _, err = db.Exec(
-        "INSERT INTO room_users(room_id, user_id, role) VALUES($1, $2, $3)",
-        room.ID, room.UserID, "owner", // Роль на английском языке
+        "INSERT INTO room_users(room_id, user_id, email, role) VALUES($1, $2, $3, $4)",
+        room.ID, room.UserID, userEmail, "owner", // Роль на английском языке
     )
     
     if err != nil {
@@ -269,6 +309,7 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusCreated)
     json.NewEncoder(w).Encode(response)
 }
+
 
 
 func joinRoom(w http.ResponseWriter, r *http.Request) {
