@@ -74,19 +74,28 @@ func initRoomsTable() {
 }
 
 func initRoomUsersTable() {
-    // Запрос для добавления нового столбца email в таблицу room_users
+    // Запрос для создания таблицы room_users
     query := `
-    ALTER TABLE room_users 
-    ADD COLUMN IF NOT EXISTS email VARCHAR(255) NOT NULL;
+    CREATE TABLE IF NOT EXISTS room_users (
+        room_id INT NOT NULL,
+        user_id INT NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        role VARCHAR(50),
+        FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        PRIMARY KEY (room_id, user_id)  -- Уникальное сочетание room_id и user_id
+    );
     `
 
     _, err := db.Exec(query)
     if err != nil {
-        log.Fatal("Ошибка при обновлении таблицы room_users:", err)
+        log.Fatal("Ошибка при создании таблицы room_users:", err)
     } else {
-        log.Println("Таблица room_users успешно обновлена или уже существует.")
+        log.Println("Таблица room_users успешно создана или уже существует.")
     }
 }
+
+
 
 func clearAllTables() {
     // Получаем список всех таблиц
@@ -327,9 +336,10 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
     var room struct {
         RoomName     string `json:"room_name"`
         RoomPassword string `json:"room_password"`
-        UserID       int    `json:"user_id"` // Получаем ID пользователя из запроса
+        UserID       int    `json:"user_id"` 
+        UserEmail    string `json:"user_email"` // Получаем email пользователя из запроса
     }
-
+    
     if err := json.NewDecoder(r.Body).Decode(&room); err != nil {
         http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
         return
@@ -362,8 +372,8 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
     err = db.QueryRow("SELECT user_id FROM room_users WHERE room_id = $1 AND user_id = $2", storedRoom.ID, room.UserID).Scan(&userInRoomID)
 
     if err == sql.ErrNoRows {
-        // Если записи нет, добавляем нового пользователя в комнату с ролью "reader"
-        _, err = db.Exec("INSERT INTO room_users(room_id, user_id, role) VALUES($1, $2, $3)", storedRoom.ID, room.UserID, "reader")
+        // Если записи нет, добавляем нового пользователя в комнату с ролью "reader" и email
+        _, err = db.Exec("INSERT INTO room_users(room_id, user_id, email, role) VALUES($1, $2, $3, $4)", storedRoom.ID, room.UserID, room.UserEmail, "reader")
         if err != nil {
             http.Error(w, "Ошибка при добавлении пользователя в комнату: "+err.Error(), http.StatusInternalServerError)
             return
@@ -384,6 +394,7 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(response)
 }
+
 
 
 
