@@ -459,6 +459,43 @@ func getRoomUsers(w http.ResponseWriter, r *http.Request) {
 
 
 
+func updateUserRole(w http.ResponseWriter, r *http.Request) {
+    setCORSHeaders(w)
+
+    if r.Method == http.MethodOptions {
+        return // Обработка preflight-запроса
+    }
+
+    if r.Method != http.MethodPost {
+        http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+        return
+    }
+
+    var data struct {
+        UserID int    `json:"user_id"`
+        Role   string `json:"role"`
+        RoomID int    `json:"room_id"`
+    }
+
+    if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+        http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    log.Printf("Обновление роли пользователя ID %d на %s в комнате ID %d\n", data.UserID, data.Role, data.RoomID)
+
+    _, err := db.Exec(`
+        UPDATE room_users 
+        SET role = $1 
+        WHERE user_id = $2 AND room_id = $3`, data.Role, data.UserID, data.RoomID)
+
+    if err != nil {
+        http.Error(w, "Ошибка обновления роли пользователя: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+}
 
 
 
@@ -479,6 +516,7 @@ func main() {
     http.HandleFunc("/createRoom", createRoom)
     http.HandleFunc("/joinRoom", joinRoom)
     http.HandleFunc("/getRoomUsers", getRoomUsers)
+    http.HandleFunc("/updateUserRole", updateUserRole)
 
 	
 
