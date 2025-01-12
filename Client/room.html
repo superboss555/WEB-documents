@@ -1,241 +1,282 @@
 <!DOCTYPE html>
 <html lang="ru">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Комната</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-        header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            position: relative;
-        }
+      header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        position: relative;
+      }
 
-        main {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+      }
 
-        h1 {
-            margin: 20px 0;
-            color: #333;
-        }
+      h1 {
+        margin: 20px 0;
+        color: #333;
+      }
 
-        form {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-end;
-            width: 100%;
-        }
+      form {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        width: 100%;
+      }
 
-        textarea {
-            width: 80%;
-            height: 600px;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            resize: none;
-        }
+      textarea {
+        width: 80%;
+        height: 600px;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        resize: none;
+      }
 
-        .button {
-            background-color: #5cb85c;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
-            transition: background-color 0.3s;
-        }
+      .button {
+        background-color: #5cb85c;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px;
+        transition: background-color 0.3s;
+      }
 
-        .button:hover {
-            background-color: #4cae4c;
-        }
+      .button:hover {
+        background-color: #4cae4c;
+      }
 
-        .access-control {
-            display: flex;
-            align-items: center;
-            margin-block: 30px;
-            gap: 10px;
-        }
+      .access-control {
+        display: flex;
+        align-items: center;
+        margin-block: 30px;
+        gap: 10px;
+      }
 
-        .access-control input {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+      .access-control input {
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
 
-        #usersTable {
-            width: 200px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
+      #usersTable {
+        width: 200px;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
 
-        #usersTable thead {
-            table-layout: fixed;
-            border-collapse: collapse;
-        }
+      #usersTable thead {
+        table-layout: fixed;
+        border-collapse: collapse;
+      }
 
-        #usersTable thead tr {
-            display: block;
-        }
+      #usersTable thead tr {
+        display: block;
+      }
 
-        #usersTable thead th:first-child {
-            width: 130px;
-            text-align: center;
-        }
+      #usersTable thead th:first-child {
+        width: 130px;
+        text-align: center;
+      }
 
-        #usersTable thead th:nth-child(2) {
-            width: 70px;
-            padding-left: 25px;
-            text-align: center;
-        }
+      #usersTable thead th:nth-child(2) {
+        width: 70px;
+        padding-left: 25px;
+        text-align: center;
+      }
 
-        #usersTable tbody {
-            display: block;
-            width: 100%;
-            overflow: auto;
-            height: 200px;
-        }
+      #usersTable tbody {
+        display: block;
+        width: 100%;
+        overflow: auto;
+        height: 200px;
+      }
 
-        #usersTable tbody td:first-child {
-            width: 130px;
-        }
+      #usersTable tbody td:first-child {
+        width: 130px;
+      }
 
-        #usersTable tbody td:nth-child(2) {
-            width: 70px;
-        }
+      #usersTable tbody td:nth-child(2) {
+        width: 70px;
+      }
 
-        #usersTable th,
-        #usersTable td {
-            padding: 2px 5px;
-        }
+      #usersTable th,
+      #usersTable td {
+        padding: 2px 5px;
+      }
 
-        #documentVersions {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-        }
+      #documentVersions {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <header>
-        <select name="documentVersions" id="documentVersions">
-            <option value="1">Версия 1</option>
-            <option value="2">Версия 2</option>
-            <option value="3">Версия 3</option>
-        </select>
+      <select name="documentVersions" id="documentVersions">
+        <option value="1">Версия 1</option>
+        <option value="2">Версия 2</option>
+        <option value="3">Версия 3</option>
+      </select>
 
-        <h1>Название комнаты: <span id="roomName"></span> (<span>ID комнаты: </span><span id="roomId"></span>)</h1>
+      <h1>
+        Название комнаты: <span id="roomName"></span> (<span>ID комнаты: </span
+        ><span id="roomId"></span>)
+      </h1>
 
-        <table id="usersTable">
-            <thead>
-                <tr>
-                    <th>Пользователь</th>
-                    <th>Роль</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="adminRow">
-                    <td class="adminName">admin@main.ru</td>
-                    <td class="adminRole">
-                        Владелец
-                    </td>
-                </tr>
-                <tr class="userRow">
-                    <td class="userName">saka@main.ru</td>
-                    <td>
-                        <select class="userRole">
-                            <option value="reader">Читатель</option>
-                            <option value="editor">Редактор</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr class="userRow">
-                    <td class="userName">ddubinkin@main.ru</td>
-                    <td>
-                        <select class="userRole">
-                            <option value="reader">Читатель</option>
-                            <option value="editor">Редактор</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr class="userRow">
-                    <td class="userName">semen@main.ru</td>
-                    <td>
-                        <select class="userRole">
-                            <option value="reader">Читатель</option>
-                            <option value="editor">Редактор</option>
-                        </select>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Роль</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="adminRow">
+            <td class="adminName">admin@main.ru</td>
+            <td class="adminRole">Владелец</td>
+          </tr>
+          <tr class="userRow">
+            <td class="userName">saka@main.ru</td>
+            <td>
+              <select class="userRole">
+                <option value="reader">Читатель</option>
+                <option value="editor">Редактор</option>
+              </select>
+            </td>
+          </tr>
+          <tr class="userRow">
+            <td class="userName">ddubinkin@main.ru</td>
+            <td>
+              <select class="userRole">
+                <option value="reader">Читатель</option>
+                <option value="editor">Редактор</option>
+              </select>
+            </td>
+          </tr>
+          <tr class="userRow">
+            <td class="userName">semen@main.ru</td>
+            <td>
+              <select class="userRole">
+                <option value="reader">Читатель</option>
+                <option value="editor">Редактор</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </header>
 
     <main>
-        <form>
-            <textarea id="documentContent" placeholder="Введите текст документа..."></textarea>
-            <button id="saveButton" type="button" class="button" onclick="saveDocument()">Сохранить</button>
-        </form>
-        <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
+      <form>
+        <textarea
+          id="documentContent"
+          placeholder="Введите текст документа..."
+        ></textarea>
+        <button
+          id="saveButton"
+          type="button"
+          class="button"
+          onclick="saveDocument()"
+        >
+          Сохранить
+        </button>
+      </form>
+      <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
     </main>
 
     <script>
-        function leaveRoom() {
-            window.location.href = "account.html" // Перенаправление на страницу аккаунта
-            localStorage.removeItem("currentRoom")
-        }
+      function leaveRoom() {
+        window.location.href = "account.html"; // Перенаправление на страницу аккаунта
+        localStorage.removeItem("currentRoom");
+      }
 
-        function saveDocument() {
-            const documentContent = document.getElementById("documentContent").value
-            const roomId = room.id
-            const userId = JSON.parse(localStorage.getItem("user")).id
-            const version = document.getElementById("documentVersions").value
+      function saveDocument() {
+        const documentContent =
+          document.getElementById("documentContent").value;
+        const roomId = room.id;
+        const userId = JSON.parse(localStorage.getItem("user")).id;
+        const version = document.getElementById("documentVersions").value;
 
-            console.log("Saving document:", documentContent, roomId, userId, version)
-        }
+        console.log(
+          "Saving document:",
+          documentContent,
+          roomId,
+          userId,
+          version
+        );
+      }
 
+      const room = JSON.parse(localStorage.getItem("currentRoom"));
 
-        const room = JSON.parse(localStorage.getItem("currentRoom"))
+      if (room && room.name && room.id) {
+        document.getElementById("roomName").innerText = room.name; // Устанавливаем название комнаты
+        document.getElementById("roomId").innerText = room.id;
+      } else {
+        alert("Не удалось загрузить информацию о комнате.");
+        window.location.href = "account.html"; // Перенаправление на страницу аккаунта
+      }
 
-        if (room && room.name && room.id) {
-            document.getElementById("roomName").innerText = room.name // Устанавливаем название комнаты
-            document.getElementById("roomId").innerText = room.id
+      const usersTable = document.getElementById("usersTable");
+
+      async function fetchRoomUsers() {
+        const room = JSON.parse(localStorage.getItem("currentRoom"));
+
+        if (room && room.id) {
+          try {
+            const response = await fetch(
+              `http://localhost:8080/getRoomUsers?roomId=${room.id}`
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              console.log("Пользователи в комнате:", data.users);
+            } else {
+              const errorMsg = await response.text();
+              console.error("Ошибка получения пользователей:", errorMsg);
+            }
+          } catch (error) {
+            console.error("Ошибка сети:", error.message);
+          }
         } else {
-            alert("Не удалось загрузить информацию о комнате.")
-            window.location.href = "account.html" // Перенаправление на страницу аккаунта
+          console.error("Не удалось загрузить информацию о комнате.");
         }
+      }
 
-        const usersTable = document.getElementById("usersTable")
+      // Вызов функции после загрузки страницы или по событию
+      document.addEventListener("DOMContentLoaded", fetchRoomUsers);
     </script>
-</body>
-
+  </body>
 </html>

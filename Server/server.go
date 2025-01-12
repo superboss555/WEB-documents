@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -32,6 +33,14 @@ type Room struct {
     RoomID      int64  `json:"room_id"`      // Уникальный идентификатор комнаты
     RoomName    string `json:"room_name"`     // Название комнаты
     RoomPassword string `json:"room_password"` // Пароль для входа (если требуется)
+}
+
+
+type RoomUser struct {
+    RoomID int    `json:"room_id"`
+    UserID int    `json:"user_id"`
+    Email  string `json:"email"`
+    Role   string `json:"role"`
 }
 
 
@@ -147,7 +156,7 @@ func setCORSHeaders(w http.ResponseWriter) {
     w.Header().Set("Access-Control-Allow-Origin", "*")
     w.Header().Set("Access-Control-Allow-Credentials", "true")
     w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-    w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+    w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS") 
 }
 
 func createUser(w http.ResponseWriter, r *http.Request) {
@@ -397,6 +406,57 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 
 
 
+func getRoomUsers(w http.ResponseWriter, r *http.Request) {
+    setCORSHeaders(w)
+
+    if r.Method == http.MethodOptions {
+        return // Обработка preflight-запроса
+    }
+
+    roomIdStr := r.URL.Query().Get("roomId")
+    if roomIdStr == "" {
+        http.Error(w, "Отсутствует ID комнаты", http.StatusBadRequest)
+        return
+    }
+
+    roomId, err := strconv.Atoi(roomIdStr)
+    if err != nil {
+        http.Error(w, "Ошибка преобразования ID комнаты: "+err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    rows, err := db.Query(`
+        SELECT user_id, email, role 
+        FROM room_users 
+        WHERE room_id = $1`, roomId)
+
+    if err != nil {
+        http.Error(w, "Ошибка получения данных о пользователях: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    var users []RoomUser
+    for rows.Next() {
+        var user RoomUser
+        if err := rows.Scan(&user.UserID, &user.Email, &user.Role); err != nil {
+            http.Error(w, "Ошибка сканирования данных: "+err.Error(), http.StatusInternalServerError)
+            return
+        }
+        user.RoomID = roomId // Устанавливаем RoomID для каждого пользователя
+        users = append(users, user)
+    }
+
+    log.Println("Пользователи в комнате:", users)
+
+    response := map[string]interface{}{
+        "users": users,
+    }
+
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(response)
+}
+
 
 
 
@@ -418,6 +478,7 @@ func main() {
 	http.HandleFunc("/account", serveAccount) 
     http.HandleFunc("/createRoom", createRoom)
     http.HandleFunc("/joinRoom", joinRoom)
+    http.HandleFunc("/getRoomUsers", getRoomUsers)
 
 	
 
