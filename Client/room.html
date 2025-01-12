@@ -153,7 +153,7 @@
             <option value="3">Версия 3</option>
         </select>
 
-        <h1>Название комнаты: <span id="roomName"></span> (<span>ID комнаты:</span><span id="roomId"></span>)</h1>
+        <h1>Название комнаты: <span id="roomName"></span> (<span>ID комнаты: </span><span id="roomId"></span>)</h1>
 
         <table id="usersTable">
             <thead>
@@ -197,69 +197,44 @@
                     </td>
                 </tr>
             </tbody>
-
         </table>
-
     </header>
 
     <main>
-        <form action="" method="post">
+        <form>
             <textarea id="documentContent" placeholder="Введите текст документа..."></textarea>
-            <button id="saveButton" type="submit" class="button" onclick="saveDocument()">Сохранить</button>
+            <button id="saveButton" type="button" class="button" onclick="saveDocument()">Сохранить</button>
         </form>
         <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
     </main>
 
-
-    <!-- <h2>Список пользователей</h2>
-
-    <ul id="userList">
-        <li>ddubinkin@example.com</li>
-        <li>ddubinkin2@main.ru</li>
-    </ul>
-
-    <h3>Управление доступом</h3>
-    <div class="access-control">
-        <input type="email" id="accessEmail" placeholder="Введите email" required>
-        <button class="button" onclick="grantAccess()">Резрешить доступ</button>
-        <button class="button" onclick="denyAccess()">Запретить доступ</button>
-    </div> -->
-
-
     <script>
         function leaveRoom() {
             window.location.href = "account.html" // Перенаправление на страницу аккаунта
+            localStorage.removeItem("currentRoom")
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const room = JSON.parse(localStorage.getItem("currentRoom"))
+        function saveDocument() {
+            const documentContent = document.getElementById("documentContent").value
+            const roomId = room.id
+            const userId = JSON.parse(localStorage.getItem("user")).id
+            const version = document.getElementById("documentVersions").value
 
-            const usersTable = document.getElementById("usersTable")
-            const adminRow = usersTable.querySelector(".adminRow")
-            const adminName = adminRow.querySelector(".adminName")
-            const adminRole = adminRow.querySelector(".adminRole")
+            console.log("Saving document:", documentContent, roomId, userId, version)
+        }
 
-            // const userRows = usersTable.querySelectorAll(".userRow")
-            // const userNames = userRows.map(row => row.querySelector(".userName"))
-            // const userRoles = userRows.map(row => row.querySelector(".userRole"))
 
-            if (room && room.name && room.id) {
-                document.getElementById("roomName").innerText = room.name // Устанавливаем название комнаты
-                document.getElementById("roomId").innerText = room.id
-            } else {
-                alert("Не удалось загрузить информацию о комнате.")
-                window.location.href = "account.html" // Перенаправление на страницу аккаунта
-            }
+        const room = JSON.parse(localStorage.getItem("currentRoom"))
 
-            // function saveDocument() {
-            //     const documentContent = document.getElementById("documentContent").value
-            //     const roomId = room.id
-            //     const userId = JSON.parse(localStorage.getItem("user")).id
-            //     const version = document.getElementById("documentVersions").value
+        if (room && room.name && room.id) {
+            document.getElementById("roomName").innerText = room.name // Устанавливаем название комнаты
+            document.getElementById("roomId").innerText = room.id
+        } else {
+            alert("Не удалось загрузить информацию о комнате.")
+            window.location.href = "account.html" // Перенаправление на страницу аккаунта
+        }
 
-            //     console.log("Saving document:", documentContent, roomId, userId, version)
-            // }
-        });
+        const usersTable = document.getElementById("usersTable")
     </script>
 </body>
 
