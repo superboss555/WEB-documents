@@ -18,9 +18,10 @@
 
         header {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             width: 100%;
+            position: relative;
         }
 
         main {
@@ -44,7 +45,7 @@
 
         textarea {
             width: 80%;
-            height: 400px;
+            height: 600px;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
@@ -81,13 +82,59 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+
+        #usersTable {
+            width: 200px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        #usersTable thead {
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        #usersTable thead tr {
+            display: block;
+        }
+
+        #usersTable thead th:first-child {
+            width: 100px;
+            text-align: center;
+        }
+
+        #usersTable thead th:nth-child(2) {
+            width: 100px;
+            text-align: center;
+        }
+
+        #usersTable tbody {
+            display: block;
+            width: 100%;
+            overflow: auto;
+            height: 200px;
+        }
+
+
+
+        #usersTable th,
+        #usersTable td {
+            padding: 2px 5px;
+        }
+
+        #documentVersions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
     </style>
 </head>
 
 <body>
 
     <header>
-        <select name="documentVersion" id="documentVersion">
+        <select name="documentVersions" id="documentVersions">
             <option value="1">Версия 1</option>
             <option value="2">Версия 2</option>
             <option value="3">Версия 3</option>
@@ -96,35 +143,47 @@
         <h1>Название комнаты: <span id="roomName"></span></h1>
 
         <table id="usersTable">
-            <tr>
-                <th>Пользователь</th>
-                <th>Роль</th>
-            </tr>
-
-            <tr>
-                <td>admin@main.ru</td>
-                <td>
-                    Владелец
-                </td>
-            </tr>
-            <tr>
-                <td class="userName">saka@main.ru</td>
-                <td>
-                    <select class="userRole" name="" id="">
-                        <option value="reader">Читатель</option>
-                        <option value="editor">Редактор</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="userName">ddubinkin@main.ru</td>
-                <td>
-                    <select class="userRole" name="" id="">
-                        <option value="reader">Читатель</option>
-                        <option value="editor">Редактор</option>
-                    </select>
-                </td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Пользователь</th>
+                    <th>Роль</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="adminRow">
+                    <td class="adminName">admin@main.ru</td>
+                    <td class="adminRole">
+                        Владелец
+                    </td>
+                </tr>
+                <tr class="userRow">
+                    <td class="userName">saka@main.ru</td>
+                    <td>
+                        <select class="userRole">
+                            <option value="reader">Читатель</option>
+                            <option value="editor">Редактор</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="userRow">
+                    <td class="userName">ddubinkin@main.ru</td>
+                    <td>
+                        <select class="userRole">
+                            <option value="reader">Читатель</option>
+                            <option value="editor">Редактор</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="userRow">
+                    <td class="userName">semen@main.ru</td>
+                    <td>
+                        <select class="userRole">
+                            <option value="reader">Читатель</option>
+                            <option value="editor">Редактор</option>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
 
         </table>
 
@@ -133,7 +192,7 @@
     <main>
         <form action="" method="post">
             <textarea id="documentContent" placeholder="Введите текст документа..."></textarea>
-            <button id="saveButton" type="submit" class="button" onclick="saveDocument()">Сохранить документ</button>
+            <button id="saveButton" type="submit" class="button" onclick="saveDocument()">Сохранить</button>
         </form>
         <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
     </main>

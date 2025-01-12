@@ -98,6 +98,11 @@
                 if (response.ok) {
                     const data = await response.json();
                     alert("Вы успешно присоединились к комнате! ID комнаты: " + data.roomId);
+
+                    localStorage.setItem("currentRoom", JSON.stringify({
+                        name: roomName,
+                        id: data.roomId
+                    }));
                     window.location.href = "room.html"; // Перенаправление на страницу комнаты
                 } else {
                     const errorMsg = await response.text();
