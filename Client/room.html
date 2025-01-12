@@ -1,503 +1,577 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Комната</title>
     <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-      header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        position: relative;
-      }
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            position: relative;
+        }
 
-      main {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-      }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
 
-      h1 {
-        margin: 20px 0;
-        color: #333;
-      }
+        h1 {
+            margin: 20px 0;
+            color: #333;
+        }
 
-      form {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-        width: 100%;
-      }
+        form {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            width: 100%;
+        }
 
-      textarea {
-        width: 80%;
-        height: 600px;
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        resize: none;
-      }
+        textarea {
+            width: 80%;
+            height: 600px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+            transition: all 0.3s;
+        }
 
-      .button {
-        background-color: #5cb85c;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-        margin: 10px;
-        transition: background-color 0.3s;
-      }
+        select {
+            padding: 2px 5px;
+            transition: all 0.3s;
+        }
 
-      .button:hover {
-        background-color: #4cae4c;
-      }
+        .button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
 
-      .access-control {
-        display: flex;
-        align-items: center;
-        margin-block: 30px;
-        gap: 10px;
-      }
+        .button:hover {
+            background-color: #4cae4c;
+        }
 
-      .access-control input {
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
+        .button:active {
+            background-color: #3c8b3c;
+        }
 
-      #usersTable {
-        width: 200px;
-        position: absolute;
-        top: 10px;
-        right: 10px;
-      }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
 
-      #usersTable thead {
-        table-layout: fixed;
-        border-collapse: collapse;
-      }
+        .access-control {
+            display: flex;
+            align-items: center;
+            margin-block: 30px;
+            gap: 10px;
+        }
 
-      #usersTable thead tr {
-        display: block;
-      }
+        .access-control input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
 
-      #usersTable thead th:first-child {
-        width: 130px;
-        text-align: center;
-      }
+        #usersTable {
+            width: 200px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
 
-      #usersTable thead th:nth-child(2) {
-        width: 70px;
-        padding-left: 25px;
-        text-align: center;
-      }
+        #usersTable thead {
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
 
-      #usersTable tbody {
-        display: block;
-        width: 100%;
-        overflow: auto;
-        height: 200px;
-      }
+        #usersTable thead tr {
+            display: block;
+        }
 
-      #usersTable tbody td:first-child {
-        width: 130px;
-      }
+        #usersTable thead th:first-child {
+            width: 130px;
+            text-align: center;
+        }
 
-      #usersTable tbody td:nth-child(2) {
-        width: 70px;
-      }
+        #usersTable thead th:nth-child(2) {
+            width: 70px;
+            padding-left: 25px;
+            text-align: center;
+        }
 
-      #usersTable th,
-      #usersTable td {
-        padding: 2px 5px;
-      }
+        #usersTable tbody {
+            display: block;
+            width: 100%;
+            overflow: auto;
+            height: 200px;
+        }
 
-      #documentVersions {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-      }
+        #usersTable tbody td:first-child {
+            width: 130px;
+        }
+
+        #usersTable tbody td:nth-child(2) {
+            width: 70px;
+        }
+
+        #usersTable th,
+        #usersTable td {
+            padding: 2px 5px;
+        }
+
+        #documentVersions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
     </style>
-  </head>
+</head>
 
-  <body>
+<body>
     <header>
-      <select name="documentVersions" id="documentVersions">
-        <option value="1">Версия 1</option>
-        <option value="2">Версия 2</option>
-        <option value="3">Версия 3</option>
-      </select>
+        <select name="documentVersions" id="documentVersions">
+            <option value="1">Версия 1</option>
+            <!-- <option value="2">Версия 2</option> -->
+            <!-- <option value="3">Версия 3</option> -->
+        </select>
 
-      <h1>
-        Название комнаты: <span id="roomName"></span> (<span>ID комнаты: </span
-        ><span id="roomId"></span>)
-      </h1>
+        <h1>
+            Название комнаты: <span id="roomName"></span> (<span>ID комнаты: </span><span id="roomId"></span>)
+        </h1>
 
-      <table id="usersTable">
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Роль</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="adminRow">
-            <td class="adminName">admin@main.ru</td>
-            <td class="adminRole">Владелец</td>
-          </tr>
-          <tr class="userRow">
-            <td class="userName">saka@main.ru</td>
-            <td>
-              <select class="userRole">
-                <option value="reader">Читатель</option>
-                <option value="editor">Редактор</option>
-              </select>
-            </td>
-          </tr>
-          <tr class="userRow">
-            <td class="userName">ddubinkin@main.ru</td>
-            <td>
-              <select class="userRole">
-                <option value="reader">Читатель</option>
-                <option value="editor">Редактор</option>
-              </select>
-            </td>
-          </tr>
-          <tr class="userRow">
-            <td class="userName">semen@main.ru</td>
-            <td>
-              <select class="userRole">
-                <option value="reader">Читатель</option>
-                <option value="editor">Редактор</option>
-              </select>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>Пользователь</th>
+                    <th>Роль</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="adminRow">
+                    <td class="adminName">admin@main.ru</td>
+                    <td class="adminRole">Владелец</td>
+                </tr>
+                <tr class="userRow">
+                    <td class="userName">saka@main.ru</td>
+                    <td>
+                        <select class="userRole">
+                            <option value="reader">Читатель</option>
+                            <option value="editor">Редактор</option>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </header>
 
     <main>
-      <form>
-        <textarea
-          id="documentContent"
-          placeholder="Введите текст документа..."
-        ></textarea>
-        <button
-          id="saveButton"
-          type="button"
-          class="button"
-          onclick="saveDocument()"
-        >
-          Сохранить
-        </button>
-      </form>
-      <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
+        <form>
+            <textarea id="documentContent" placeholder="Введите текст документа..."></textarea>
+            <button id="saveButton" type="button" class="button" onclick="saveDocument()">
+                Сохранить
+            </button>
+        </form>
+        <button class="button" onclick="leaveRoom()">Покинуть комнату</button>
     </main>
 
     <script>
-      function leaveRoom() {
-        window.location.href = "account.html"; // Перенаправление на страницу аккаунта
-        localStorage.removeItem("currentRoom");
-      }
-
-      async function saveDocument() {
-        const documentContent =
-          document.getElementById("documentContent").value;
-        const roomId = room.id;
-        const userId = JSON.parse(localStorage.getItem("user")).id;
-
-        console.log("Saving document:", documentContent, roomId, userId);
-
-        try {
-          const response = await fetch(`http://localhost:8080/saveDocument`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              content: documentContent,
-              room_id: roomId,
-              user_id: userId,
-            }),
-          });
-
-          if (!response.ok) {
-            const errorMsg = await response.text();
-            console.error("Ошибка сохранения документа:", errorMsg);
-          } else {
-            console.log("Документ успешно сохранен.");
-            // Обновляем список версий после успешного сохранения
-            await fetchDocumentVersions(roomId); // Перезагружаем версии
-            // Можно также автоматически загружать текст для последней версии
-            const versionSelect = document.getElementById("documentVersions");
-            const latestVersion = versionSelect.options[0].value; // Получаем последнюю версию
-            await fetchDocumentContentByVersion(roomId, latestVersion); // Загружаем контент для последней версии
-          }
-        } catch (error) {
-          console.error("Ошибка сети при сохранении документа:", error.message);
-        }
-      }
-
-      const room = JSON.parse(localStorage.getItem("currentRoom"));
-
-      if (room && room.name && room.id) {
-        document.getElementById("roomName").innerText = room.name; // Устанавливаем название комнаты
-        document.getElementById("roomId").innerText = room.id;
-      } else {
-        alert("Не удалось загрузить информацию о комнате.");
-        window.location.href = "account.html"; // Перенаправление на страницу аккаунта
-      }
-
-      const usersTableBody = document.querySelector("#usersTable tbody");
-
-      // Функция для очистки таблицы
-      function clearUsersTable() {
-        usersTableBody.innerHTML = "";
-      }
-
-      async function fetchRoomUsers() {
-        const room = JSON.parse(localStorage.getItem("currentRoom"));
-
-        if (room && room.id) {
-          try {
-            const response = await fetch(
-              `http://localhost:8080/getRoomUsers?roomId=${room.id}`
-            );
-
-            if (response.ok) {
-              const data = await response.json();
-              console.log("Пользователи в комнате:", data.users);
-
-              // Очистка таблицы
-              clearUsersTable();
-
-              // Добавление владельца (owner) в таблицу
-              const owner = data.users.find((user) => user.role === "owner");
-              if (owner) {
-                addRowToTable(owner.email, owner.role, owner.user_id, true);
-              }
-
-              // Добавление остальных пользователей
-              data.users
-                .filter((user) => user.role !== "owner")
-                .forEach((user) => {
-                  addRowToTable(user.email, user.role, user.user_id); // Передаем user_id
-                });
+        function initRoom() {
+            if (room && room.name && room.id) {
+                document.getElementById("roomName").innerText = room.name // Устанавливаем название комнаты
+                document.getElementById("roomId").innerText = room.id
             } else {
-              const errorMsg = await response.text();
-              console.error("Ошибка получения пользователей:", errorMsg);
+                alert("Не удалось загрузить информацию о комнате.")
+                window.location.href = "account.html" // Перенаправление на страницу аккаунта
             }
-          } catch (error) {
-            console.error("Ошибка сети:", error.message);
-          }
-        } else {
-          console.error("Не удалось загрузить информацию о комнате.");
-        }
-      }
-
-      // Функция для добавления строки в таблицу
-      function addRowToTable(email, role, userId, isOwner = false) {
-        const row = usersTableBody.insertRow();
-        row.classList.add(isOwner ? "adminRow" : "userRow");
-
-        const emailCell = row.insertCell(0);
-        emailCell.textContent = email;
-
-        const roleCell = row.insertCell(1);
-        if (isOwner) {
-          roleCell.textContent = "Владелец";
-        } else {
-          const roleSelect = document.createElement("select");
-          roleSelect.classList.add("userRole");
-
-          const readerOption = document.createElement("option");
-          readerOption.value = "reader";
-          readerOption.textContent = "Читатель";
-          if (role === "reader") readerOption.selected = true;
-
-          const editorOption = document.createElement("option");
-          editorOption.value = "editor";
-          editorOption.textContent = "Редактор";
-          if (role === "editor") editorOption.selected = true;
-
-          roleSelect.appendChild(readerOption);
-          roleSelect.appendChild(editorOption);
-
-          // Добавляем обработчик события изменения роли
-          roleSelect.addEventListener("change", async (event) => {
-            const newRole = event.target.value; // Получаем новую роль
-            console.log(
-              `Изменение роли на: ${newRole} для пользователя ID: ${userId}`
-            ); // Отладочное сообщение
-            await updateUserRole(userId, newRole, room.id); // Обновляем роль в БД
-          });
-
-          roleCell.appendChild(roleSelect);
         }
 
-        usersTableBody.appendChild(row);
-      }
+        function leaveRoom() {
+            // Получаем текущего пользователя из localStorage
+            const currentUser = JSON.parse(localStorage.getItem("user"))
 
-      // Функция для получения пользователей комнаты и заполнения таблицы
-      async function fetchRoomUsers() {
-        const room = JSON.parse(localStorage.getItem("currentRoom"));
+            if (currentUser && currentUser.role) {
+                // Удаляем свойство role
+                delete currentUser.role
 
-        if (room && room.id) {
-          try {
-            const response = await fetch(
-              `http://localhost:8080/getRoomUsers?roomId=${room.id}`
-            );
+                // Сохраняем обновлённый объект обратно в localStorage
+                localStorage.setItem("user", JSON.stringify(currentUser))
+                console.log("Роль пользователя удалена при выходе из комнаты:", currentUser)
+            }
 
-            if (response.ok) {
-              const data = await response.json();
-              console.log("Пользователи в комнате:", data.users);
+            window.location.href = "account.html" // Перенаправление на страницу аккаунта
+            localStorage.removeItem("currentRoom")
+        }
 
-              // Очистка таблицы
-              clearUsersTable();
+        async function saveDocument() {
+            const documentContent =
+                document.getElementById("documentContent").value
+            const roomId = room.id
+            const userId = JSON.parse(localStorage.getItem("user")).id
 
-              // Добавление владельца (owner) в таблицу
-              const owner = data.users.find((user) => user.role === "owner");
-              if (owner) {
-                addRowToTable(owner.email, owner.role, owner.user_id, true);
-              }
+            console.log("Saving document:", documentContent, roomId, userId)
 
-              // Добавление остальных пользователей
-              data.users
-                .filter((user) => user.role !== "owner")
-                .forEach((user) => {
-                  addRowToTable(user.email, user.role, user.user_id); // Передаем user_id
-                });
+            try {
+                const response = await fetch(`http://localhost:8080/saveDocument`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        content: documentContent,
+                        room_id: roomId,
+                        user_id: userId,
+                    }),
+                })
+
+                if (!response.ok) {
+                    const errorMsg = await response.text()
+                    console.error("Ошибка сохранения документа:", errorMsg)
+                } else {
+                    console.log("Документ успешно сохранен.")
+                    // Обновляем список версий после успешного сохранения
+                    await fetchDocumentVersions(roomId) // Перезагружаем версии
+                    // Можно также автоматически загружать текст для последней версии
+                    const versionSelect = document.getElementById("documentVersions")
+                    const latestVersion = versionSelect.options[0].value // Получаем последнюю версию
+                    await fetchDocumentContentByVersion(roomId, latestVersion) // Загружаем контент для последней версии
+                }
+            } catch (error) {
+                console.error("Ошибка сети при сохранении документа:", error.message)
+            }
+        }
+
+
+        // Функция для очистки таблицы
+        function clearUsersTable() {
+            usersTableBody.innerHTML = ""
+        }
+
+        async function fetchRoomUsers() {
+            const room = JSON.parse(localStorage.getItem("currentRoom"))
+
+            if (room && room.id) {
+                try {
+                    const response = await fetch(
+                        `http://localhost:8080/getRoomUsers?roomId=${room.id}`
+                    )
+
+                    if (response.ok) {
+                        const data = await response.json()
+                        console.log("Пользователи в комнате:", data.users)
+
+                        // Очистка таблицы
+                        clearUsersTable()
+
+                        // Добавление владельца (owner) в таблицу
+                        const owner = data.users.find((user) => user.role === "owner")
+                        if (owner) {
+                            addRowToTable(owner.email, owner.role, owner.user_id, true)
+                        }
+
+                        // Добавление остальных пользователей
+                        data.users
+                            .filter((user) => user.role !== "owner")
+                            .forEach((user) => {
+                                addRowToTable(user.email, user.role, user.user_id) // Передаем user_id
+                            })
+                    } else {
+                        const errorMsg = await response.text()
+                        console.error("Ошибка получения пользователей:", errorMsg)
+                    }
+                } catch (error) {
+                    console.error("Ошибка сети:", error.message)
+                }
             } else {
-              const errorMsg = await response.text();
-              console.error("Ошибка получения пользователей:", errorMsg);
+                console.error("Не удалось загрузить информацию о комнате.")
             }
-          } catch (error) {
-            console.error("Ошибка сети:", error.message);
-          }
-        } else {
-          console.error("Не удалось загрузить информацию о комнате.");
         }
-      }
 
-      async function updateUserRole(userId, newRole, roomId) {
-        try {
-          console.log(
-            `Отправка запроса на обновление роли: ${newRole} для пользователя ID: ${userId} в комнате ID: ${roomId}`
-          );
-          const response = await fetch(`http://localhost:8080/updateUserRole`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              user_id: userId,
-              role: newRole,
-              room_id: roomId,
-            }),
-          });
+        // Функция для добавления строки в таблицу
+        function addRowToTable(email, role, userId, isOwner = false) {
+            const row = usersTableBody.insertRow()
+            row.classList.add(isOwner ? "adminRow" : "userRow")
 
-          if (!response.ok) {
-            const errorMsg = await response.text();
-            console.error("Ошибка обновления роли:", errorMsg);
-          } else {
-            console.log(
-              `Роль пользователя с ID ${userId} успешно обновлена на ${newRole}`
-            );
-          }
-        } catch (error) {
-          console.error("Ошибка сети при обновлении роли:", error.message);
-        }
-      }
+            const emailCell = row.insertCell(0)
+            emailCell.textContent = email
 
-      async function fetchDocumentVersions(roomId) {
-    try {
-        const response = await fetch(`http://localhost:8080/getDocumentVersions?roomId=${roomId}`);
+            const roleCell = row.insertCell(1)
+            if (isOwner) {
+                roleCell.textContent = "Владелец"
+            } else {
+                const roleSelect = document.createElement("select")
+                roleSelect.classList.add("userRole")
 
-        if (response.ok) {
-            const data = await response.json();
-            const versionSelect = document.getElementById("documentVersions");
+                const readerOption = document.createElement("option")
+                readerOption.value = "reader"
+                readerOption.textContent = "Читатель"
+                if (role === "reader") readerOption.selected = true
 
-            // Очищаем текущие версии в списке
-            versionSelect.innerHTML = "";
+                const editorOption = document.createElement("option")
+                editorOption.value = "editor"
+                editorOption.textContent = "Редактор"
+                if (role === "editor") editorOption.selected = true
 
-            // Добавляем новые версии в выпадающий список
-            data.versions.forEach(version => {
-                const option = document.createElement("option");
-                option.value = version;
-                option.textContent = version;
-                versionSelect.appendChild(option);
-            });
+                roleSelect.appendChild(readerOption)
+                roleSelect.appendChild(editorOption)
 
-            // Если есть версии, загружаем текст для последней
-            if (data.versions.length > 0) {
-                const latestVersion = data.versions[0]; // Получаем последнюю версию
-                await fetchDocumentContentByVersion(roomId, latestVersion); // Загружаем контент для последней версии
+                // Добавляем обработчик события изменения роли
+                roleSelect.addEventListener("change", async (event) => {
+                    const newRole = event.target.value // Получаем новую роль
+                    console.log(
+                        `Изменение роли на: ${newRole} для пользователя ID: ${userId}`
+                    ) // Отладочное сообщение
+                    await updateUserRole(userId, newRole, room.id) // Обновляем роль в БД
+                })
+
+                roleCell.appendChild(roleSelect)
             }
 
-            // Устанавливаем обработчик события для выбора версии
-            versionSelect.addEventListener('change', async (event) => {
-                const selectedVersion = event.target.value;
-                await fetchDocumentContentByVersion(roomId, selectedVersion);
-            });
-        } else {
-            const errorMsg = await response.text();
-            console.error("Ошибка получения версий документа:", errorMsg);
+            usersTableBody.appendChild(row)
         }
-    } catch (error) {
-        console.error("Ошибка сети при получении версий документа:", error.message);
-    }
-}
+
+        // Функция для получения пользователей комнаты и заполнения таблицы
+        async function fetchRoomUsers() {
+            const room = JSON.parse(localStorage.getItem("currentRoom"))
+
+            if (room && room.id) {
+                try {
+                    const response = await fetch(
+                        `http://localhost:8080/getRoomUsers?roomId=${room.id}`
+                    )
+
+                    if (response.ok) {
+                        const data = await response.json()
+                        console.log("Пользователи в комнате:", data.users)
+
+                        // Очистка таблицы
+                        clearUsersTable()
+
+                        // Обновление роли текущего пользователя в localStorage
+                        updateUserRoleInLocalStorage(data.users)
 
 
-      // Функция для получения контента по выбранной версии
-      async function fetchDocumentContentByVersion(roomId, version) {
-        try {
-          const response = await fetch(
-            `http://localhost:8080/getDocumentContentByVersion?roomId=${roomId}&version=${version}`
-          );
+                        // Добавление владельца (owner) в таблицу
+                        const owner = data.users.find((user) => user.role === "owner")
+                        if (owner) {
+                            addRowToTable(owner.email, owner.role, owner.user_id, true)
+                        }
 
-          if (response.ok) {
-            const data = await response.json();
-            document.getElementById("documentContent").value = data.content; // Устанавливаем текст документа
-          } else {
-            const errorMsg = await response.text();
-            console.error("Ошибка получения текста документа:", errorMsg);
-          }
-        } catch (error) {
-          console.error(
-            "Ошибка сети при получении текста документа:",
-            error.message
-          );
+                        // Добавление остальных пользователей
+                        data.users
+                            .filter((user) => user.role !== "owner")
+                            .forEach((user) => {
+                                addRowToTable(user.email, user.role, user.user_id) // Передаем user_id
+                            })
+                    } else {
+                        const errorMsg = await response.text()
+                        console.error("Ошибка получения пользователей:", errorMsg)
+                    }
+                } catch (error) {
+                    console.error("Ошибка сети:", error.message)
+                }
+            } else {
+                console.error("Не удалось загрузить информацию о комнате.")
+            }
         }
-      }
 
-      document.addEventListener("DOMContentLoaded", async () => {
-        await fetchRoomUsers(); // Получаем пользователей
-        await fetchDocumentVersions(room.id); // Получаем версии документа
-      });
+        async function updateUserRole(userId, newRole, roomId) {
+            try {
+                console.log(
+                    `Отправка запроса на обновление роли: ${newRole} для пользователя ID: ${userId} в комнате ID: ${roomId}`
+                )
+                const response = await fetch(`http://localhost:8080/updateUserRole`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        role: newRole,
+                        room_id: roomId,
+                    }),
+                })
+
+                if (!response.ok) {
+                    const errorMsg = await response.text()
+                    console.error("Ошибка обновления роли:", errorMsg)
+                } else {
+                    console.log(
+                        `Роль пользователя с ID ${userId} успешно обновлена на ${newRole}`
+                    )
+                }
+            } catch (error) {
+                console.error("Ошибка сети при обновлении роли:", error.message)
+            }
+        }
+
+        function updateUserRoleInLocalStorage(users) {
+            // Получаем текущего пользователя из localStorage
+            const currentUser = JSON.parse(localStorage.getItem("user"))
+            if (!currentUser || !currentUser.id) {
+                console.error("Пользователь не найден в localStorage.")
+                return
+            }
+
+            // Ищем пользователя в списке пользователей комнаты
+            const matchedUser = users.find(user => user.user_id === currentUser.id)
+
+            if (matchedUser) {
+                // Обновляем роль текущего пользователя
+                currentUser.role = matchedUser.role
+                // Сохраняем обновлённый объект обратно в localStorage
+                localStorage.setItem("user", JSON.stringify(currentUser))
+                console.log("Роль обновлена в localStorage:", currentUser)
+            } else {
+                console.warn("Пользователь не найден в списке пользователей комнаты.")
+            }
+        }
+
+
+        async function applyRoleBasedRestrictions() {
+            // Получаем текущего пользователя из localStorage
+            const currentUser = JSON.parse(localStorage.getItem("user"))
+
+            if (!currentUser || !currentUser.role) {
+                console.warn("Роль пользователя не найдена, функционал не будет ограничен.")
+                return
+            }
+
+            const role = currentUser.role
+            console.log(`Применение ограничений для роли: ${role}`)
+
+            // Выбираем элементы для ограничения
+            const userRoleSelects = document.querySelectorAll(".userRole")
+            const documentVersionsSelect = document.getElementById("documentVersions")
+            const saveButton = document.getElementById("saveButton")
+            const textarea = document.getElementById("documentContent")
+
+            // Блокируем функционал в зависимости от роли
+            switch (role) {
+                case "editor":
+                    // Блокируем изменение ролей
+                    userRoleSelects.forEach(select => select.disabled = true)
+                    break
+
+                case "reader":
+                    // Блокируем изменение ролей, выбор версий, кнопку сохранения и текстовое поле
+                    userRoleSelects.forEach(select => select.disabled = true)
+                    if (documentVersionsSelect) documentVersionsSelect.disabled = true
+                    if (saveButton) saveButton.disabled = true
+                    if (textarea) textarea.disabled = true
+                    break
+
+                default:
+                    console.log("Для этой роли ограничения не предусмотрены.")
+                    break
+            }
+        }
+
+        async function fetchDocumentVersions(roomId) {
+            try {
+                const response = await fetch(`http://localhost:8080/getDocumentVersions?roomId=${roomId}`)
+
+                if (response.ok) {
+                    const data = await response.json()
+                    const versionSelect = document.getElementById("documentVersions")
+
+                    // Очищаем текущие версии в списке
+                    versionSelect.innerHTML = ""
+
+                    // Добавляем новые версии в выпадающий список
+                    data.versions.forEach(version => {
+                        const option = document.createElement("option")
+                        option.value = version
+                        option.textContent = version
+                        versionSelect.appendChild(option)
+                    })
+
+                    // Если есть версии, загружаем текст для последней
+                    if (data.versions.length > 0) {
+                        const latestVersion = data.versions[0] // Получаем последнюю версию
+                        await fetchDocumentContentByVersion(roomId, latestVersion) // Загружаем контент для последней версии
+                    }
+
+                    // Устанавливаем обработчик события для выбора версии
+                    versionSelect.addEventListener('change', async (event) => {
+                        const selectedVersion = event.target.value
+                        await fetchDocumentContentByVersion(roomId, selectedVersion)
+                    })
+                } else {
+                    const errorMsg = await response.text()
+                    console.error("Ошибка получения версий документа:", errorMsg)
+                }
+            } catch (error) {
+                console.error("Ошибка сети при получении версий документа:", error.message)
+            }
+        }
+
+
+        // Функция для получения контента по выбранной версии
+        async function fetchDocumentContentByVersion(roomId, version) {
+            try {
+                const response = await fetch(
+                    `http://localhost:8080/getDocumentContentByVersion?roomId=${roomId}&version=${version}`
+                )
+
+                if (response.ok) {
+                    const data = await response.json()
+                    document.getElementById("documentContent").value = data.content // Устанавливаем текст документа
+                } else {
+                    const errorMsg = await response.text()
+                    console.error("Ошибка получения текста документа:", errorMsg)
+                }
+            } catch (error) {
+                console.error(
+                    "Ошибка сети при получении текста документа:",
+                    error.message
+                )
+            }
+        }
+
+
+        const room = JSON.parse(localStorage.getItem("currentRoom"))
+        const usersTableBody = document.querySelector("#usersTable tbody")
+
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await initRoom()
+            await fetchRoomUsers() // Получаем пользователей
+            await fetchDocumentVersions(room.id) // Получаем версии документа
+            await applyRoleBasedRestrictions()
+        });
     </script>
-  </body>
+</body>
+
 </html>
