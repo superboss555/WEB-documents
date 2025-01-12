@@ -223,20 +223,42 @@
         localStorage.removeItem("currentRoom");
       }
 
-      function saveDocument() {
+      async function saveDocument() {
         const documentContent =
           document.getElementById("documentContent").value;
         const roomId = room.id;
         const userId = JSON.parse(localStorage.getItem("user")).id;
-        const version = document.getElementById("documentVersions").value;
 
-        console.log(
-          "Saving document:",
-          documentContent,
-          roomId,
-          userId,
-          version
-        );
+        console.log("Saving document:", documentContent, roomId, userId);
+
+        try {
+          const response = await fetch(`http://localhost:8080/saveDocument`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              content: documentContent,
+              room_id: roomId,
+              user_id: userId,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorMsg = await response.text();
+            console.error("Ошибка сохранения документа:", errorMsg);
+          } else {
+            console.log("Документ успешно сохранен.");
+            // Обновляем список версий после успешного сохранения
+            await fetchDocumentVersions(roomId); // Перезагружаем версии
+            // Можно также автоматически загружать текст для последней версии
+            const versionSelect = document.getElementById("documentVersions");
+            const latestVersion = versionSelect.options[0].value; // Получаем последнюю версию
+            await fetchDocumentContentByVersion(roomId, latestVersion); // Загружаем контент для последней версии
+          }
+        } catch (error) {
+          console.error("Ошибка сети при сохранении документа:", error.message);
+        }
       }
 
       const room = JSON.parse(localStorage.getItem("currentRoom"));
@@ -410,8 +432,72 @@
         }
       }
 
-      // Вызов функции после загрузки страницы
-      document.addEventListener("DOMContentLoaded", fetchRoomUsers);
+      async function fetchDocumentVersions(roomId) {
+    try {
+        const response = await fetch(`http://localhost:8080/getDocumentVersions?roomId=${roomId}`);
+
+        if (response.ok) {
+            const data = await response.json();
+            const versionSelect = document.getElementById("documentVersions");
+
+            // Очищаем текущие версии в списке
+            versionSelect.innerHTML = "";
+
+            // Добавляем новые версии в выпадающий список
+            data.versions.forEach(version => {
+                const option = document.createElement("option");
+                option.value = version;
+                option.textContent = version;
+                versionSelect.appendChild(option);
+            });
+
+            // Если есть версии, загружаем текст для последней
+            if (data.versions.length > 0) {
+                const latestVersion = data.versions[0]; // Получаем последнюю версию
+                await fetchDocumentContentByVersion(roomId, latestVersion); // Загружаем контент для последней версии
+            }
+
+            // Устанавливаем обработчик события для выбора версии
+            versionSelect.addEventListener('change', async (event) => {
+                const selectedVersion = event.target.value;
+                await fetchDocumentContentByVersion(roomId, selectedVersion);
+            });
+        } else {
+            const errorMsg = await response.text();
+            console.error("Ошибка получения версий документа:", errorMsg);
+        }
+    } catch (error) {
+        console.error("Ошибка сети при получении версий документа:", error.message);
+    }
+}
+
+
+      // Функция для получения контента по выбранной версии
+      async function fetchDocumentContentByVersion(roomId, version) {
+        try {
+          const response = await fetch(
+            `http://localhost:8080/getDocumentContentByVersion?roomId=${roomId}&version=${version}`
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            document.getElementById("documentContent").value = data.content; // Устанавливаем текст документа
+          } else {
+            const errorMsg = await response.text();
+            console.error("Ошибка получения текста документа:", errorMsg);
+          }
+        } catch (error) {
+          console.error(
+            "Ошибка сети при получении текста документа:",
+            error.message
+          );
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        await fetchRoomUsers(); // Получаем пользователей
+        await fetchDocumentVersions(room.id); // Получаем версии документа
+      });
     </script>
   </body>
 </html>
