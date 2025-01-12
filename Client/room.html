@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Комната</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -100,12 +106,13 @@
         }
 
         #usersTable thead th:first-child {
-            width: 100px;
+            width: 130px;
             text-align: center;
         }
 
         #usersTable thead th:nth-child(2) {
-            width: 100px;
+            width: 70px;
+            padding-left: 25px;
             text-align: center;
         }
 
@@ -116,7 +123,13 @@
             height: 200px;
         }
 
+        #usersTable tbody td:first-child {
+            width: 130px;
+        }
 
+        #usersTable tbody td:nth-child(2) {
+            width: 70px;
+        }
 
         #usersTable th,
         #usersTable td {
@@ -140,7 +153,7 @@
             <option value="3">Версия 3</option>
         </select>
 
-        <h1>Название комнаты: <span id="roomName"></span></h1>
+        <h1>Название комнаты: <span id="roomName"></span> (<span>ID комнаты:</span><span id="roomId"></span>)</h1>
 
         <table id="usersTable">
             <thead>
@@ -198,11 +211,6 @@
     </main>
 
 
-
-
-
-
-
     <!-- <h2>Список пользователей</h2>
 
     <ul id="userList">
@@ -218,8 +226,6 @@
     </div> -->
 
 
-
-
     <script>
         function leaveRoom() {
             window.location.href = "account.html" // Перенаправление на страницу аккаунта
@@ -227,12 +233,32 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             const room = JSON.parse(localStorage.getItem("currentRoom"))
-            if (room && room.name) {
+
+            const usersTable = document.getElementById("usersTable")
+            const adminRow = usersTable.querySelector(".adminRow")
+            const adminName = adminRow.querySelector(".adminName")
+            const adminRole = adminRow.querySelector(".adminRole")
+
+            // const userRows = usersTable.querySelectorAll(".userRow")
+            // const userNames = userRows.map(row => row.querySelector(".userName"))
+            // const userRoles = userRows.map(row => row.querySelector(".userRole"))
+
+            if (room && room.name && room.id) {
                 document.getElementById("roomName").innerText = room.name // Устанавливаем название комнаты
+                document.getElementById("roomId").innerText = room.id
             } else {
                 alert("Не удалось загрузить информацию о комнате.")
                 window.location.href = "account.html" // Перенаправление на страницу аккаунта
             }
+
+            // function saveDocument() {
+            //     const documentContent = document.getElementById("documentContent").value
+            //     const roomId = room.id
+            //     const userId = JSON.parse(localStorage.getItem("user")).id
+            //     const version = document.getElementById("documentVersions").value
+
+            //     console.log("Saving document:", documentContent, roomId, userId, version)
+            // }
         });
     </script>
 </body>
