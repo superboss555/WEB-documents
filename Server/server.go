@@ -49,6 +49,15 @@ type Document struct {
 	Content string `json:"content"`
 }
 
+
+func setCORSHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+}
+
+
 func initDB() {
 	var err error
 	connStr := "host=localhost user=admin password=123 dbname=test port=5432 sslmode=disable"
@@ -62,6 +71,7 @@ func initDB() {
 	}
 
 	// clearAllTables()
+
 	initRoomsTable()
 	initRoomUsersTable()
 	initDocumentVersionsTable()
@@ -96,7 +106,7 @@ func initRoomUsersTable() {
         role VARCHAR(50),
         FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        PRIMARY KEY (room_id, user_id)  -- Уникальное сочетание room_id и user_id
+        PRIMARY KEY (room_id, user_id)
     );
     `
 
@@ -165,13 +175,6 @@ func userExists(email string) bool {
 		return false
 	}
 	return exists
-}
-
-func setCORSHeaders(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 }
 
 func createUser(w http.ResponseWriter, r *http.Request) {
@@ -525,44 +528,37 @@ func saveDocument(w http.ResponseWriter, r *http.Request) {
 
 	var doc Document
 
-	// Декодирование JSON-данных из запроса
 	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
 		http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Получаем последнюю версию документа для данной комнаты
 	var lastVersion string
 	err := db.QueryRow("SELECT version FROM document_versions WHERE room_id = $1 ORDER BY created_at DESC LIMIT 1", doc.RoomID).Scan(&lastVersion)
 
 	var newVersion string
 	userIDStr := fmt.Sprintf("%d", doc.UserID)
 
-	// Инициализация счетчика версии
 	var lastVersionNum int
 
 	if err == sql.ErrNoRows {
-		// Если нет предыдущих версий, начинаем с 1
 		newVersion = fmt.Sprintf("%s.1", userIDStr)
 		lastVersionNum = 1
 	} else if err != nil {
 		http.Error(w, "Ошибка получения последней версии: "+err.Error(), http.StatusInternalServerError)
 		return
 	} else {
-		// Разделяем последнюю версию на части
 		parts := strings.Split(lastVersion, ".")
+		
 		if len(parts) == 2 {
-			// Извлекаем номер версии и увеличиваем его на 1
 			lastVersionNum, _ = strconv.Atoi(parts[1])
 			newVersion = fmt.Sprintf("%s.%d", userIDStr, lastVersionNum+1)
 		} else {
-			// Если формат версии некорректен, начинаем с 1
 			newVersion = fmt.Sprintf("%s.1", userIDStr)
 			lastVersionNum = 1
 		}
 	}
 
-	// Сохраняем новый документ в базе данных
 	_, err = db.Exec(`
         INSERT INTO document_versions (room_id, version, content)
         VALUES ($1, $2, $3)`, doc.RoomID, newVersion, doc.Content)
