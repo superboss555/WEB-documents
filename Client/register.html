@@ -59,6 +59,17 @@
             background-color: #4cae4c;
         }
     </style>
+</head>
+
+<body>
+    <h1>Регистрация</h1>
+    <form onsubmit="registerUser(event)">
+        <label for="username">Email:</label><br>
+        <input type="email" id="username" name="username" required><br><br>
+        <label for="password">Пароль:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="submit" value="Зарегистрироваться">
+    </form>
     <script>
         async function registerUser(event) {
             event.preventDefault() // Предотвратить стандартное поведение формы
@@ -95,17 +106,6 @@
             }
         }
     </script>
-</head>
-
-<body>
-    <h1>Регистрация</h1>
-    <form onsubmit="registerUser(event)">
-        <label for="username">Email:</label><br>
-        <input type="text" id="username" name="username" required><br><br>
-        <label for="password">Пароль:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
-        <input type="submit" value="Зарегистрироваться">
-    </form>
 </body>
 
 </html>

@@ -272,7 +272,6 @@
             }
         }
 
-
         // Функция для очистки таблицы
         function clearUsersTable() {
             usersTableBody.innerHTML = ""
@@ -458,7 +457,6 @@
             }
         }
 
-
         async function applyRoleBasedRestrictions() {
             // Получаем текущего пользователя из localStorage
             const currentUser = JSON.parse(localStorage.getItem("user"))
@@ -536,7 +534,6 @@
                 console.error("Ошибка сети при получении версий документа:", error.message)
             }
         }
-
 
         // Функция для получения контента по выбранной версии
         async function fetchDocumentContentByVersion(roomId, version) {
