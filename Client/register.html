@@ -5,64 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        h1 {
-            margin: 20px 0;
-            color: #333;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            width: 300px;
-        }
-
-        input {
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        .button {
-            background-color: #5cb85c;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 20px;
-            transition: background-color 0.3s;
-            margin-top: 10px;
-        }
-
-        .button:hover {
-            background-color: #4cae4c;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <h1>Регистрация</h1>
     <form onsubmit="registerUser(event)">
-        <label for="username">Email:</label><br>
-        <input type="email" id="username" name="username" required><br><br>
-        <label for="password">Пароль:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
-        <input type="submit" value="Зарегистрироваться">
+        <input type="email" id="username" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Пароль" required>
+        <button type="submit" class="button">Зарегистрироваться</button>
     </form>
     <script>
         async function registerUser(event) {

@@ -1,0 +1,166 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: Arial, sans-serif;
+	background-color: #f4f4f4;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+}
+
+h1 {
+	margin: 20px 0;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	width: 300px;
+}
+
+input {
+	margin: 10px 0;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 16px;
+}
+
+.button {
+	background-color: #b8955c;
+	color: #fff;
+	padding: 15px 30px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 20px;
+	transition: background-color 0.3s;
+	margin-top: 10px;
+	text-decoration: none;
+}
+
+.button:hover {
+	background-color: #ae8a4c;
+}
+
+.button:active {
+	background-color: #8b723c;
+}
+
+.button:disabled {
+	background-color: #ccc;
+	cursor: not-allowed;
+}
+
+header {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	position: relative;
+}
+
+main {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+}
+
+textarea {
+	width: 80%;
+	height: 600px;
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	resize: none;
+	transition: all 0.3s;
+}
+
+select {
+	padding: 2px 5px;
+	transition: all 0.3s;
+}
+
+.access-control {
+	display: flex;
+	align-items: center;
+	margin-block: 30px;
+	gap: 10px;
+}
+
+.access-control input {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+#usersTable {
+	width: 200px;
+	position: absolute;
+	top: 10px;
+	right: 60px;
+}
+
+#usersTable thead {
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+#usersTable thead tr {
+	display: block;
+}
+
+#usersTable thead th:first-child {
+	width: 130px;
+	text-align: center;
+}
+
+#usersTable thead th:nth-child(2) {
+	width: 70px;
+	padding-left: 25px;
+	text-align: center;
+}
+
+#usersTable tbody {
+	display: block;
+	width: 100%;
+	overflow: auto;
+	height: 200px;
+}
+
+#usersTable tbody td:first-child {
+	width: 130px;
+}
+
+#usersTable tbody td:nth-child(2) {
+	width: 70px;
+}
+
+#usersTable th,
+#usersTable td {
+	padding: 2px 5px;
+}
+
+#documentVersions {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+}
+
+#documentForm {
+	display: flex;
+	gap: 20px;
+	flex-direction: row;
+	align-items: flex-end;
+	width: 100%;
+	padding: 10px;
+}
