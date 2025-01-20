@@ -3,3 +3,4 @@
 *.exe
 *.mod
 *.sum
+.DS_Store
