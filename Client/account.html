@@ -13,52 +13,33 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            /* Изменяем направление на колонку */
             justify-content: center;
-            /* Центрируем по вертикали */
             align-items: center;
-            /* Центрируем по горизонтали */
             height: 100vh;
-            /* Высота на весь экран */
         }
 
         h1 {
             margin: 20px 0;
-            /* Вертикальные отступы */
             color: #333;
-            /* Цвет заголовка */
         }
 
         .button {
             background-color: #5cb85c;
-            /* Цвет кнопки */
             color: white;
-            /* Цвет текста кнопки */
             padding: 15px 30px;
-            /* Поля для кнопки */
             border: none;
-            /* Убираем границы */
             border-radius: 6px;
-            /* Закругляем углы */
             cursor: pointer;
-            /* Указатель курсора при наведении */
             text-decoration: none;
-            /* Убираем подчеркивание */
             font-size: 20px;
-            /* Размер шрифта для кнопок */
             transition: background-color 0.3s;
-            /* Плавный переход цвета фона при наведении */
             margin: 15px 0;
-            /* Отступ между кнопками */
             width: 250px;
-            /* Ширина кнопок */
             text-align: center;
-            /* Центрируем текст внутри кнопки */
         }
 
         .button:hover {
             background-color: #4cae4c;
-            /* Темнее при наведении */
         }
     </style>
 </head>
@@ -66,31 +47,30 @@
 <body>
     <h1>Ваш аккаунт</h1>
     <div id="user-info"></div>
-
     <a href="createRoom.html" class="button" id="createRoomLink">Создать комнату</a>
     <a href="joinRoom.html" class="button" id="joinRoomLink">Присоединиться к комнате</a>
 
-
     <script>
-        // Добавляем слушатель событий для ссылки "Создать комнату"
         document.getElementById('createRoomLink').addEventListener('click', function (event) {
-            event.preventDefault() // Отменяем стандартное поведение ссылки
-            window.location.href = 'createRoom.html' // Переход на новую страницу
+            event.preventDefault()
+
+            window.location.href = 'createRoom.html'
         })
 
-        // Добавляем слушатель событий для ссылки "Присоединиться к комнате"
         document.getElementById('joinRoomLink').addEventListener('click', function (event) {
-            event.preventDefault() // Отменяем стандартное поведение ссылки
-            window.location.href = 'joinRoom.html' // Переход на новую страницу
+            event.preventDefault()
+
+            window.location.href = 'joinRoom.html'
         })
 
-        // получение id
         document.addEventListener("DOMContentLoaded", () => {
             const user = JSON.parse(localStorage.getItem("user"))
+
             if (user) {
                 document.getElementById("user-info").innerText = `ID: ${user.id}, Email: ${user.email}`
             } else {
                 alert("Пользователь не авторизован.")
+
                 window.location.href = "index.html"
             }
         });

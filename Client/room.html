@@ -162,9 +162,7 @@
 <body>
     <header>
         <select name="documentVersions" id="documentVersions">
-            <option value="1">Версия 1</option>
-            <!-- <option value="2">Версия 2</option> -->
-            <!-- <option value="3">Версия 3</option> -->
+            <option value="1">1.1</option>
         </select>
 
         <h1>
@@ -209,28 +207,26 @@
     <script>
         function initRoom() {
             if (room && room.name && room.id) {
-                document.getElementById("roomName").innerText = room.name // Устанавливаем название комнаты
+                document.getElementById("roomName").innerText = room.name
                 document.getElementById("roomId").innerText = room.id
             } else {
-                alert("Не удалось загрузить информацию о комнате.")
-                window.location.href = "account.html" // Перенаправление на страницу аккаунта
+                alert("Ошибка при загрузке информации о комнате.")
+
+                window.location.href = "account.html"
             }
         }
 
         function leaveRoom() {
-            // Получаем текущего пользователя из localStorage
             const currentUser = JSON.parse(localStorage.getItem("user"))
 
             if (currentUser && currentUser.role) {
-                // Удаляем свойство role
                 delete currentUser.role
 
-                // Сохраняем обновлённый объект обратно в localStorage
                 localStorage.setItem("user", JSON.stringify(currentUser))
-                console.log("Роль пользователя удалена при выходе из комнаты:", currentUser)
             }
 
-            window.location.href = "account.html" // Перенаправление на страницу аккаунта
+            window.location.href = "account.html"
+
             localStorage.removeItem("currentRoom")
         }
 
@@ -240,7 +236,7 @@
             const roomId = room.id
             const userId = JSON.parse(localStorage.getItem("user")).id
 
-            console.log("Saving document:", documentContent, roomId, userId)
+            console.debug("Данные документа:", documentContent, roomId, userId)
 
             try {
                 const response = await fetch(`http://localhost:8080/saveDocument`, {
@@ -257,22 +253,20 @@
 
                 if (!response.ok) {
                     const errorMsg = await response.text()
-                    console.error("Ошибка сохранения документа:", errorMsg)
+                    console.error("Ошибка при сохранения документа:", errorMsg)
+                    Я
                 } else {
-                    console.log("Документ успешно сохранен.")
-                    // Обновляем список версий после успешного сохранения
-                    await fetchDocumentVersions(roomId) // Перезагружаем версии
-                    // Можно также автоматически загружать текст для последней версии
+                    await fetchDocumentVersions(roomId)
+
                     const versionSelect = document.getElementById("documentVersions")
-                    const latestVersion = versionSelect.options[0].value // Получаем последнюю версию
-                    await fetchDocumentContentByVersion(roomId, latestVersion) // Загружаем контент для последней версии
+                    const latestVersion = versionSelect.options[0].value
+                    await fetchDocumentByVersion(roomId, latestVersion)
                 }
             } catch (error) {
-                console.error("Ошибка сети при сохранении документа:", error.message)
+                console.error("Ошибка:", error.message)
             }
         }
 
-        // Функция для очистки таблицы
         function clearUsersTable() {
             usersTableBody.innerHTML = ""
         }
@@ -288,38 +282,37 @@
 
                     if (response.ok) {
                         const data = await response.json()
-                        console.log("Пользователи в комнате:", data.users)
 
-                        // Очистка таблицы
+                        console.debug("Пользователи в комнате:", data.users)
+
                         clearUsersTable()
 
-                        // Добавление владельца (owner) в таблицу
                         const owner = data.users.find((user) => user.role === "owner")
+
                         if (owner) {
                             addRowToTable(owner.email, owner.role, owner.user_id, true)
                         }
 
-                        // Добавление остальных пользователей
                         data.users
                             .filter((user) => user.role !== "owner")
                             .forEach((user) => {
-                                addRowToTable(user.email, user.role, user.user_id) // Передаем user_id
+                                addRowToTable(user.email, user.role, user.user_id)
                             })
                     } else {
                         const errorMsg = await response.text()
-                        console.error("Ошибка получения пользователей:", errorMsg)
+                        console.error("Ошибка при получения пользователей:", errorMsg)
                     }
                 } catch (error) {
-                    console.error("Ошибка сети:", error.message)
+                    console.error("Ошибка:", error.message)
                 }
             } else {
-                console.error("Не удалось загрузить информацию о комнате.")
+                console.error("Ошибка при загрузке информации о комнате.")
             }
         }
 
-        // Функция для добавления строки в таблицу
         function addRowToTable(email, role, userId, isOwner = false) {
             const row = usersTableBody.insertRow()
+
             row.classList.add(isOwner ? "adminRow" : "userRow")
 
             const emailCell = row.insertCell(0)
@@ -345,13 +338,12 @@
                 roleSelect.appendChild(readerOption)
                 roleSelect.appendChild(editorOption)
 
-                // Добавляем обработчик события изменения роли
                 roleSelect.addEventListener("change", async (event) => {
-                    const newRole = event.target.value // Получаем новую роль
-                    console.log(
-                        `Изменение роли на: ${newRole} для пользователя ID: ${userId}`
-                    ) // Отладочное сообщение
-                    await updateUserRole(userId, newRole, room.id) // Обновляем роль в БД
+                    const newRole = event.target.value
+
+                    console.debug(`Пользователь с ID ${userId} теперь ${newRole}`)
+
+                    await updateUserRole(userId, newRole, room.id)
                 })
 
                 roleCell.appendChild(roleSelect)
@@ -360,7 +352,6 @@
             usersTableBody.appendChild(row)
         }
 
-        // Функция для получения пользователей комнаты и заполнения таблицы
         async function fetchRoomUsers() {
             const room = JSON.parse(localStorage.getItem("currentRoom"))
 
@@ -372,44 +363,40 @@
 
                     if (response.ok) {
                         const data = await response.json()
-                        console.log("Пользователи в комнате:", data.users)
+                        console.debug("Пользователи в комнате:", data.users)
 
-                        // Очистка таблицы
                         clearUsersTable()
 
-                        // Обновление роли текущего пользователя в localStorage
                         updateUserRoleInLocalStorage(data.users)
 
-
-                        // Добавление владельца (owner) в таблицу
                         const owner = data.users.find((user) => user.role === "owner")
                         if (owner) {
                             addRowToTable(owner.email, owner.role, owner.user_id, true)
                         }
 
-                        // Добавление остальных пользователей
                         data.users
                             .filter((user) => user.role !== "owner")
                             .forEach((user) => {
-                                addRowToTable(user.email, user.role, user.user_id) // Передаем user_id
+                                addRowToTable(user.email, user.role, user.user_id)
                             })
                     } else {
                         const errorMsg = await response.text()
-                        console.error("Ошибка получения пользователей:", errorMsg)
+                        console.error("Ошибка при получения пользователей:", errorMsg)
                     }
                 } catch (error) {
-                    console.error("Ошибка сети:", error.message)
+                    console.error("Ошибка:", error.message)
                 }
             } else {
-                console.error("Не удалось загрузить информацию о комнате.")
+                console.error("Ошибка при загрузке информации о комнате.")
             }
         }
 
         async function updateUserRole(userId, newRole, roomId) {
             try {
-                console.log(
-                    `Отправка запроса на обновление роли: ${newRole} для пользователя ID: ${userId} в комнате ID: ${roomId}`
+                console.debug(
+                    `Комната ${roomId} - Пользователь с ID ${userId} обновление на ${newRole}`
                 )
+
                 const response = await fetch(`http://localhost:8080/updateUserRole`, {
                     method: "POST",
                     headers: {
@@ -424,41 +411,39 @@
 
                 if (!response.ok) {
                     const errorMsg = await response.text()
-                    console.error("Ошибка обновления роли:", errorMsg)
+                    console.error("Ошибка при обновлении роли:", errorMsg)
                 } else {
-                    console.log(
-                        `Роль пользователя с ID ${userId} успешно обновлена на ${newRole}`
+                    console.debug(
+                        `Пользователь с ID ${userId} теперь ${newRole}`
                     )
                 }
             } catch (error) {
-                console.error("Ошибка сети при обновлении роли:", error.message)
+                console.error("Ошибка при обновлении роли:", error.message)
             }
         }
 
         function updateUserRoleInLocalStorage(users) {
-            // Получаем текущего пользователя из localStorage
             const currentUser = JSON.parse(localStorage.getItem("user"))
+
             if (!currentUser || !currentUser.id) {
                 console.error("Пользователь не найден в localStorage.")
                 return
             }
 
-            // Ищем пользователя в списке пользователей комнаты
             const matchedUser = users.find(user => user.user_id === currentUser.id)
 
             if (matchedUser) {
-                // Обновляем роль текущего пользователя
                 currentUser.role = matchedUser.role
-                // Сохраняем обновлённый объект обратно в localStorage
+
                 localStorage.setItem("user", JSON.stringify(currentUser))
-                console.log("Роль обновлена в localStorage:", currentUser)
+
+                console.debug("Обновление роли для:", currentUser)
             } else {
-                console.warn("Пользователь не найден в списке пользователей комнаты.")
+                console.error("Пользователь не найден в списке пользователей комнаты.")
             }
         }
 
-        async function applyRoleBasedRestrictions() {
-            // Получаем текущего пользователя из localStorage
+        async function applyRestrictions() {
             const currentUser = JSON.parse(localStorage.getItem("user"))
 
             if (!currentUser || !currentUser.role) {
@@ -467,23 +452,20 @@
             }
 
             const role = currentUser.role
-            console.log(`Применение ограничений для роли: ${role}`)
 
-            // Выбираем элементы для ограничения
+            console.debug(`Применение ограничений для роли: ${role}`)
+
             const userRoleSelects = document.querySelectorAll(".userRole")
             const documentVersionsSelect = document.getElementById("documentVersions")
             const saveButton = document.getElementById("saveButton")
             const textarea = document.getElementById("documentContent")
 
-            // Блокируем функционал в зависимости от роли
             switch (role) {
                 case "editor":
-                    // Блокируем изменение ролей
                     userRoleSelects.forEach(select => select.disabled = true)
                     break
 
                 case "reader":
-                    // Блокируем изменение ролей, выбор версий, кнопку сохранения и текстовое поле
                     userRoleSelects.forEach(select => select.disabled = true)
                     if (documentVersionsSelect) documentVersionsSelect.disabled = true
                     if (saveButton) saveButton.disabled = true
@@ -491,7 +473,6 @@
                     break
 
                 default:
-                    console.log("Для этой роли ограничения не предусмотрены.")
                     break
             }
         }
@@ -504,10 +485,8 @@
                     const data = await response.json()
                     const versionSelect = document.getElementById("documentVersions")
 
-                    // Очищаем текущие версии в списке
                     versionSelect.innerHTML = ""
 
-                    // Добавляем новые версии в выпадающий список
                     data.versions.forEach(version => {
                         const option = document.createElement("option")
                         option.value = version
@@ -515,28 +494,25 @@
                         versionSelect.appendChild(option)
                     })
 
-                    // Если есть версии, загружаем текст для последней
                     if (data.versions.length > 0) {
-                        const latestVersion = data.versions[0] // Получаем последнюю версию
-                        await fetchDocumentContentByVersion(roomId, latestVersion) // Загружаем контент для последней версии
+                        const latestVersion = data.versions[0]
+                        await fetchDocumentByVersion(roomId, latestVersion)
                     }
 
-                    // Устанавливаем обработчик события для выбора версии
                     versionSelect.addEventListener('change', async (event) => {
                         const selectedVersion = event.target.value
-                        await fetchDocumentContentByVersion(roomId, selectedVersion)
+                        await fetchDocumentByVersion(roomId, selectedVersion)
                     })
                 } else {
                     const errorMsg = await response.text()
-                    console.error("Ошибка получения версий документа:", errorMsg)
+                    console.error("Ошибка при получения версий документа:", errorMsg)
                 }
             } catch (error) {
-                console.error("Ошибка сети при получении версий документа:", error.message)
+                console.error("Ошибка:", error.message)
             }
         }
 
-        // Функция для получения контента по выбранной версии
-        async function fetchDocumentContentByVersion(roomId, version) {
+        async function fetchDocumentByVersion(roomId, version) {
             try {
                 const response = await fetch(
                     `http://localhost:8080/getDocumentContentByVersion?roomId=${roomId}&version=${version}`
@@ -544,29 +520,25 @@
 
                 if (response.ok) {
                     const data = await response.json()
-                    document.getElementById("documentContent").value = data.content // Устанавливаем текст документа
+                    document.getElementById("documentContent").value = data.content
                 } else {
                     const errorMsg = await response.text()
-                    console.error("Ошибка получения текста документа:", errorMsg)
+
+                    console.error("Ошибка при получения документа:", errorMsg)
                 }
             } catch (error) {
-                console.error(
-                    "Ошибка сети при получении текста документа:",
-                    error.message
-                )
+                console.error("Ошибка:", error.message)
             }
         }
-
 
         const room = JSON.parse(localStorage.getItem("currentRoom"))
         const usersTableBody = document.querySelector("#usersTable tbody")
 
-
         document.addEventListener("DOMContentLoaded", async () => {
             await initRoom()
-            await fetchRoomUsers() // Получаем пользователей
-            await fetchDocumentVersions(room.id) // Получаем версии документа
-            await applyRoleBasedRestrictions()
+            await fetchRoomUsers()
+            await fetchDocumentVersions(room.id)
+            await applyRestrictions()
         });
     </script>
 </body>

@@ -27,19 +27,14 @@
             display: flex;
             flex-direction: column;
             width: 300px;
-            /* Ширина формы */
         }
 
         input {
             margin: 10px 0;
-            /* Отступы между полями ввода */
             padding: 10px;
             border: 1px solid #ccc;
-            /* Рамка полей ввода */
             border-radius: 4px;
-            /* Скругление углов */
             font-size: 16px;
-            /* Размер шрифта */
         }
 
         .button {
@@ -52,7 +47,6 @@
             font-size: 20px;
             transition: background-color 0.3s;
             margin-top: 10px;
-            /* Отступ сверху для кнопки */
         }
 
         .button:hover {
@@ -72,7 +66,7 @@
 
     <script>
         async function loginUser(event) {
-            event.preventDefault() // Предотвратить стандартное поведение формы
+            event.preventDefault()
 
             const email = document.getElementById("username").value
             const password = document.getElementById("password").value
@@ -94,23 +88,21 @@
                 if (response.ok) {
                     const data = await response.json()
 
-                    // Записываем данные пользователя в localStorage
                     const userObject = {
                         id: data.userId,
                         email: data.email
                     }
                     localStorage.setItem("user", JSON.stringify(userObject))
 
-                    alert("Успешный вход: " + data.message)
+                    alert("Вход выполнен успешно: " + data.message)
 
-                    // Перенаправление на страницу аккаунта
                     window.location.href = "account.html"
                 } else {
                     const errorMsg = await response.text()
-                    alert("Ошибка входа: " + errorMsg)
+                    alert("Ошибка при входе: " + errorMsg)
                 }
             } catch (error) {
-                alert("Ошибка сети: " + error.message)
+                alert("Ошибка: " + error.message)
             }
         }
     </script>

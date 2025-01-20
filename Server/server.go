@@ -21,7 +21,6 @@ var (
 	upgrader = websocket.Upgrader{}
 )
 
-// User структура для хранения данных пользователя
 type User struct {
 	ID       int    `json:"id"`
 	Email    string `json:"email"`
@@ -30,10 +29,10 @@ type User struct {
 
 type Room struct {
 	ID           int64  `json:"id"`
-	UserID       int64  `json:"user_id"`       // ID пользователя, создавшего комнату
-	RoomID       int64  `json:"room_id"`       // Уникальный идентификатор комнаты
-	RoomName     string `json:"room_name"`     // Название комнаты
-	RoomPassword string `json:"room_password"` // Пароль для входа (если требуется)
+	UserID       int64  `json:"user_id"`       
+	RoomID       int64  `json:"room_id"`       
+	RoomName     string `json:"room_name"`     
+	RoomPassword string `json:"room_password"` 
 }
 
 type RoomUser struct {
@@ -89,7 +88,6 @@ func initRoomsTable() {
 }
 
 func initRoomUsersTable() {
-	// Запрос для создания таблицы room_users
 	query := `
     CREATE TABLE IF NOT EXISTS room_users (
         room_id INT NOT NULL,
@@ -131,7 +129,6 @@ func initDocumentVersionsTable() {
 }
 
 func clearAllTables() {
-	// Получаем список всех таблиц
 	rows, err := db.Query("SELECT tablename FROM pg_tables WHERE schemaname = 'public';")
 	if err != nil {
 		log.Fatal("Ошибка получения списка таблиц:", err)
@@ -147,7 +144,6 @@ func clearAllTables() {
 		tables = append(tables, tableName)
 	}
 
-	// Формируем запрос TRUNCATE для всех таблиц с сбросом идентификаторов
 	if len(tables) > 0 {
 		truncateQuery := "TRUNCATE TABLE " + strings.Join(tables, ", ") + " RESTART IDENTITY CASCADE;"
 		_, err = db.Exec(truncateQuery)
@@ -178,59 +174,11 @@ func setCORSHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 }
 
-// func createUser(w http.ResponseWriter, r *http.Request) {
-// 	setCORSHeaders(w)
-
-// 	if r.Method == http.MethodOptions {
-// 		return // Просто возвращаем ответ с установкой заголовков
-// 	}
-
-// 	if r.Method != http.MethodPost {
-// 		http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
-// 		return
-// 	}
-
-// 	var user User
-// 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-// 		http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	log.Printf("Received user data: %+v", user) // Логируем входящие данные
-
-// 	if user.Email == "" || user.Password == "" {
-// 		http.Error(w, "Email и пароль не могут быть пустыми", http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// Хэшируем пароль
-// 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-// 	if err != nil {
-// 		http.Error(w, "Ошибка хэширования пароля: "+err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-// 	user.Password = string(hash)
-
-// 	idLock.Lock()
-// 	defer idLock.Unlock()
-
-// 	err = db.QueryRow("INSERT INTO users(email, password) VALUES($1, $2) RETURNING id",
-// 		user.Email, user.Password).Scan(&user.ID)
-// 	if err != nil {
-// 		http.Error(w, "Ошибка при создании пользователя: "+err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	response := map[string]string{"message": "Пользователь успешно зарегистрирован", "redirect": "/account"}
-// 	w.WriteHeader(http.StatusCreated)
-// 	json.NewEncoder(w).Encode(response)
-// }
-
 func createUser(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
-			return // Просто возвращаем ответ с установкой заголовков
+			return 
 	}
 
 	if r.Method != http.MethodPost {
@@ -244,20 +192,18 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 			return
 	}
 
-	log.Printf("Received user data: %+v", user) // Логируем входящие данные
+	log.Printf("Received user data: %+v", user) 
 
 	if user.Email == "" || user.Password == "" {
 			http.Error(w, "Email и пароль не могут быть пустыми", http.StatusBadRequest)
 			return
 	}
 
-	// Проверка уникальности email
 	if userExists(user.Email) {
 			http.Error(w, "Пользователь с таким email уже существует", http.StatusConflict)
 			return
 	}
 
-	// Хэшируем пароль
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 			http.Error(w, "Ошибка хэширования пароля: "+err.Error(), http.StatusInternalServerError)
@@ -315,14 +261,12 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Сравниваем хэш пароля
 	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password))
 	if err != nil {
 		http.Error(w, "Неверный Email или пароль", http.StatusUnauthorized)
 		return
 	}
 
-	// Формируем ответ
 	response := map[string]interface{}{
 		"message": "Успешный вход в систему",
 		"userId":  storedUser.ID,
@@ -337,7 +281,7 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
-			return // Обработка preflight-запроса
+			return 
 	}
 
 	if r.Method != http.MethodPost {
@@ -351,13 +295,11 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 			return
 	}
 
-	// Проверка обязательных полей
 	if room.UserID == 0 || room.RoomName == "" {
 			http.Error(w, "ID пользователя и название комнаты не могут быть пустыми", http.StatusBadRequest)
 			return
 	}
 
-	// Хэшируем пароль комнаты, если он предоставлен
 	if room.RoomPassword != "" {
 			hash, err := bcrypt.GenerateFromPassword([]byte(room.RoomPassword), bcrypt.DefaultCost)
 			if err != nil {
@@ -367,7 +309,6 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 			room.RoomPassword = string(hash)
 	}
 
-	// Получаем email пользователя из таблицы users
 	var userEmail string
 	err := db.QueryRow("SELECT email FROM users WHERE id = $1", room.UserID).Scan(&userEmail)
 	if err != nil {
@@ -375,7 +316,6 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 			return
 	}
 
-	// Вставка данных в таблицу rooms
 	err = db.QueryRow(
 			"INSERT INTO rooms(user_id, room_name, room_password) VALUES($1, $2, $3) RETURNING id",
 			room.UserID, room.RoomName, room.RoomPassword,
@@ -386,10 +326,9 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 			return
 	}
 
-	// Добавление записи в таблицу room_users с ролью "owner" и email пользователя
 	_, err = db.Exec(
 			"INSERT INTO room_users(room_id, user_id, email, role) VALUES($1, $2, $3, $4)",
-			room.ID, room.UserID, userEmail, "owner", // Роль на английском языке
+			room.ID, room.UserID, userEmail, "owner", 
 	)
 
 	if err != nil {
@@ -412,7 +351,7 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
-			return // Обработка preflight-запроса
+			return 
 	}
 
 	if r.Method != http.MethodPost {
@@ -424,7 +363,7 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 			RoomName     string `json:"room_name"`
 			RoomPassword string `json:"room_password"`
 			UserID       int    `json:"user_id"`
-			UserEmail    string `json:"user_email"` // Получаем email пользователя из запроса
+			UserEmail    string `json:"user_email"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&room); err != nil {
@@ -437,7 +376,6 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 			return
 	}
 
-	// Проверка существования комнаты
 	var storedRoom struct {
 			ID           int
 			RoomPassword string
@@ -454,31 +392,26 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 			return
 	}
 
-	// Проверка пароля комнаты
 	err = bcrypt.CompareHashAndPassword([]byte(storedRoom.RoomPassword), []byte(room.RoomPassword))
 	if err != nil {
 			http.Error(w, "Неверный пароль", http.StatusUnauthorized)
 			return
 	}
 
-	// Проверка на существование записи в таблице room_users
 	var userInRoomID int
 	err = db.QueryRow("SELECT user_id FROM room_users WHERE room_id = $1 AND user_id = $2", storedRoom.ID, room.UserID).Scan(&userInRoomID)
 
 	if err == sql.ErrNoRows {
-			// Если записи нет, добавляем нового пользователя в комнату с ролью "reader" и email
 			_, err = db.Exec("INSERT INTO room_users(room_id, user_id, email, role) VALUES($1, $2, $3, $4)", storedRoom.ID, room.UserID, room.UserEmail, "reader")
 			if err != nil {
 					http.Error(w, "Ошибка при добавлении пользователя в комнату: "+err.Error(), http.StatusInternalServerError)
 					return
 			}
 	} else if err != nil {
-			// Если произошла другая ошибка
 			http.Error(w, "Ошибка проверки существования пользователя: "+err.Error(), http.StatusInternalServerError)
 			return
 	}
 
-	// Формируем ответ с ID и названием комнаты
 	response := map[string]interface{}{
 			"message":  "Успешное присоединение к комнате",
 			"roomId":   storedRoom.ID,
@@ -493,7 +426,7 @@ func getRoomUsers(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
-		return // Обработка preflight-запроса
+		return 
 	}
 
 	roomIdStr := r.URL.Query().Get("roomId")
@@ -526,7 +459,7 @@ func getRoomUsers(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Ошибка сканирования данных: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		user.RoomID = roomId // Устанавливаем RoomID для каждого пользователя
+		user.RoomID = roomId
 		users = append(users, user)
 	}
 
@@ -544,7 +477,7 @@ func updateUserRole(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
-		return // Обработка preflight-запроса
+		return 
 	}
 
 	if r.Method != http.MethodPost {
@@ -582,7 +515,7 @@ func saveDocument(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
-		return // Обработка preflight-запроса
+		return
 	}
 
 	if r.Method != http.MethodPost {
@@ -646,7 +579,7 @@ func getDocumentVersions(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
-		return // Обработка preflight-запроса
+		return 
 	}
 
 	roomIdStr := r.URL.Query().Get("roomId")
@@ -683,7 +616,7 @@ func getDocumentContentByVersion(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
-		return // Обработка preflight-запроса
+		return 
 	}
 
 	roomIdStr := r.URL.Query().Get("roomId")
@@ -709,6 +642,40 @@ func getDocumentContentByVersion(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func serveAccount(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "account.html")
+}
+
+func handleConnection(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	
+	if err != nil {
+		log.Println("Ошибка при установке соединения:", err)
+		return
+	}
+
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Println("Ошибка при закрытии соединения:", err)
+		}
+	}()
+
+	for {
+		messageType, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Ошибка чтения сообщения:", err)
+			break
+		}
+
+		log.Printf("Получено сообщение: %s\n", msg)
+
+		if err := conn.WriteMessage(messageType, msg); err != nil {
+			log.Println("Ошибка отправки сообщения:", err)
+			break 
+		}
+	}
+}
+
 func main() {
 	initDB()
 	defer db.Close()
@@ -728,38 +695,5 @@ func main() {
 	http.HandleFunc("/getDocumentContentByVersion", getDocumentContentByVersion)
 
 	log.Println("Сервер запущен на порту 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil)) // Запуск HTTP-сервера
-}
-
-func serveAccount(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "account.html")
-}
-
-func handleConnection(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("Ошибка при установке соединения:", err)
-		return
-	}
-	defer func() {
-		if err := conn.Close(); err != nil {
-			log.Println("Ошибка при закрытии соединения:", err)
-		}
-	}()
-
-	for {
-		messageType, msg, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Ошибка чтения сообщения:", err)
-			break // Выход из цикла при ошибке
-		}
-
-		log.Printf("Получено сообщение: %s\n", msg)
-
-		// Эхо-ответ (если нужно)
-		if err := conn.WriteMessage(messageType, msg); err != nil {
-			log.Println("Ошибка отправки сообщения:", err)
-			break // Выход из цикла при ошибке
-		}
-	}
+	log.Fatal(http.ListenAndServe(":8080", nil)) 
 }
