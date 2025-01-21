@@ -49,7 +49,6 @@ type Document struct {
 	Content string `json:"content"`
 }
 
-
 func setCORSHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -57,21 +56,19 @@ func setCORSHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 }
 
-
 func initDB() {
 	var err error
 	connStr := "host=localhost user=admin password=123 dbname=test port=5432 sslmode=disable"
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("Ошибка подключения к базе данных:", err)
+		log.Fatal("Ошибка при подключении к базе данных:", err)
 	}
 
 	if err = db.Ping(); err != nil {
-		log.Fatal("Ошибка пинга базы данных:", err)
+		log.Fatal("Ошибка пинга:", err)
 	}
 
 	// clearAllTables()
-
 	initRoomsTable()
 	initRoomUsersTable()
 	initDocumentVersionsTable()
@@ -93,7 +90,7 @@ func initRoomsTable() {
 	if err != nil {
 		log.Fatal("Ошибка при создании таблицы комнат:", err)
 	} else {
-		log.Println("Таблица комнат успешно создана или уже существует.")
+		log.Println("Таблица rooms успешно создана или уже существует.")
 	}
 }
 
@@ -141,7 +138,7 @@ func initDocumentVersionsTable() {
 func clearAllTables() {
 	rows, err := db.Query("SELECT tablename FROM pg_tables WHERE schemaname = 'public';")
 	if err != nil {
-		log.Fatal("Ошибка получения списка таблиц:", err)
+		log.Fatal("Ошибка при получения списка таблиц:", err)
 	}
 	defer rows.Close()
 
@@ -149,7 +146,7 @@ func clearAllTables() {
 	for rows.Next() {
 		var tableName string
 		if err := rows.Scan(&tableName); err != nil {
-			log.Fatal("Ошибка сканирования имени таблицы:", err)
+			log.Fatal("Ошибка при сканировании имени таблицы:", err)
 		}
 		tables = append(tables, tableName)
 	}
@@ -158,7 +155,7 @@ func clearAllTables() {
 		truncateQuery := "TRUNCATE TABLE " + strings.Join(tables, ", ") + " RESTART IDENTITY CASCADE;"
 		_, err = db.Exec(truncateQuery)
 		if err != nil {
-			log.Fatal("Ошибка очистки таблиц:", err)
+			log.Fatal("Ошибка при чистке таблиц:", err)
 		} else {
 			log.Println("Все таблицы успешно очищены и счетчики сброшены.")
 		}
@@ -171,7 +168,7 @@ func userExists(email string) bool {
 	var exists bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email=$1)", email).Scan(&exists)
 	if err != nil {
-		log.Println("Ошибка проверки существования пользователя:", err)
+		log.Println("Ошибка при проверке существования пользователя:", err)
 		return false
 	}
 	return exists
@@ -191,7 +188,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
+			http.Error(w, "Ошибка декодирования: "+err.Error(), http.StatusBadRequest)
 			return
 	}
 
@@ -209,7 +206,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-			http.Error(w, "Ошибка хэширования пароля: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Ошибка при хэшировании пароля: "+err.Error(), http.StatusInternalServerError)
 			return
 	}
 	user.Password = string(hash)
@@ -243,7 +240,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Ошибка декодирования: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -260,7 +257,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Неверный Email или пароль", http.StatusUnauthorized)
 			return
 		}
-		http.Error(w, "Ошибка получения данных: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Ошибка при получении данных: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -294,7 +291,7 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 
 	var room Room
 	if err := json.NewDecoder(r.Body).Decode(&room); err != nil {
-			http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
+			http.Error(w, "Ошибка декодирования: "+err.Error(), http.StatusBadRequest)
 			return
 	}
 
@@ -306,7 +303,7 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 	if room.RoomPassword != "" {
 			hash, err := bcrypt.GenerateFromPassword([]byte(room.RoomPassword), bcrypt.DefaultCost)
 			if err != nil {
-					http.Error(w, "Ошибка хэширования пароля: "+err.Error(), http.StatusInternalServerError)
+					http.Error(w, "Ошибка при хэшировании пароля: "+err.Error(), http.StatusInternalServerError)
 					return
 			}
 			room.RoomPassword = string(hash)
@@ -315,7 +312,7 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 	var userEmail string
 	err := db.QueryRow("SELECT email FROM users WHERE id = $1", room.UserID).Scan(&userEmail)
 	if err != nil {
-			http.Error(w, "Ошибка получения email пользователя: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Ошибка при получения Email пользователя: "+err.Error(), http.StatusInternalServerError)
 			return
 	}
 
@@ -391,7 +388,7 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, "Комната не найдена", http.StatusUnauthorized)
 					return
 			}
-			http.Error(w, "Ошибка получения данных: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Ошибка при получении данных: "+err.Error(), http.StatusInternalServerError)
 			return
 	}
 
@@ -411,7 +408,7 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 					return
 			}
 	} else if err != nil {
-			http.Error(w, "Ошибка проверки существования пользователя: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Ошибка при проверке существования пользователя: "+err.Error(), http.StatusInternalServerError)
 			return
 	}
 
@@ -440,7 +437,7 @@ func getRoomUsers(w http.ResponseWriter, r *http.Request) {
 
 	roomId, err := strconv.Atoi(roomIdStr)
 	if err != nil {
-		http.Error(w, "Ошибка преобразования ID комнаты: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Ошибка изменения ID комнаты: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -529,7 +526,7 @@ func saveDocument(w http.ResponseWriter, r *http.Request) {
 	var doc Document
 
 	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
-		http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Ошибка декодирования: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -545,7 +542,7 @@ func saveDocument(w http.ResponseWriter, r *http.Request) {
 		newVersion = fmt.Sprintf("%s.1", userIDStr)
 		lastVersionNum = 1
 	} else if err != nil {
-		http.Error(w, "Ошибка получения последней версии: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Ошибка получения последней версии документа: "+err.Error(), http.StatusInternalServerError)
 		return
 	} else {
 		parts := strings.Split(lastVersion, ".")
@@ -620,7 +617,7 @@ func getDocumentContentByVersion(w http.ResponseWriter, r *http.Request) {
 
 	roomId, err := strconv.Atoi(roomIdStr)
 	if err != nil || roomId <= 0 || version == "" {
-		http.Error(w, "Некорректный ID комнаты или версия", http.StatusBadRequest)
+		http.Error(w, "Некорректный ID комнаты или версия документа", http.StatusBadRequest)
 		return
 	}
 

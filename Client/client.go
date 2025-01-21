@@ -9,8 +9,9 @@ import (
 )
 
 func main() {
-	err := exec.Command("cmd", "/c", "start", "index.html").Start() // Windows
-	// err := exec.Command("open", "index.html").Start() // macOS
+	// err := exec.Command("cmd", "/c", "start", "index.html").Start() // Windows
+	err := exec.Command("open", "index.html").Start() // macOS
+	
 	if err != nil {
 		log.Fatal("Ошибка при открытия браузера:", err)
 	}
@@ -23,7 +24,7 @@ func main() {
 	}
 	
 	defer conn.Close()
-
+	
 	log.Println("Подключение к WebSocket-серверу установлено")
 
 	go func() {
@@ -39,6 +40,5 @@ func main() {
 
 	for {
 		time.Sleep(1 * time.Second) 
-
 	}
 }
