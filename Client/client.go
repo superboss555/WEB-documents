@@ -13,7 +13,7 @@ func main() {
 	err := exec.Command("open", "index.html").Start() // macOS
 	
 	if err != nil {
-		log.Fatal("Ошибка при открытия браузера:", err)
+		log.Fatal("Ошибка при открытии браузера:", err)
 	}
 
 	url := "ws://localhost:8080/ws"
@@ -24,14 +24,14 @@ func main() {
 	}
 	
 	defer conn.Close()
-	
+
 	log.Println("Подключение к WebSocket-серверу установлено")
 
 	go func() {
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err != nil {
-				log.Println("Ошибка при чтения сообщения:", err)
+				log.Println("Ошибка при чтении сообщения:", err)
 				return
 			}
 			log.Printf("Получено сообщение: %s\n", msg)
