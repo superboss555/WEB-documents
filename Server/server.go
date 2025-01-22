@@ -49,42 +49,6 @@ type Document struct {
 	Content string `json:"content"`
 }
 
-func setCORSHeaders(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-}
-
-func handleConnection(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	
-	if err != nil {
-		log.Println("Ошибка при установке соединения:", err)
-		return
-	}
-
-	defer func() {
-		if err := conn.Close(); err != nil {
-			log.Println("Ошибка при закрытии соединения:", err)
-		}
-	}()
-
-	for {
-		messageType, msg, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Ошибка чтения сообщения:", err)
-			break
-		}
-
-		log.Printf("Получено сообщение: %s\n", msg)
-
-		if err := conn.WriteMessage(messageType, msg); err != nil {
-			log.Println("Ошибка отправки сообщения:", err)
-			break 
-		}
-	}
-}
 
 func initDB() {
 	var err error
@@ -215,11 +179,9 @@ func clearAllTables() {
 
 func createUser(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
-
 	if r.Method == http.MethodOptions {
 		return
 	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
 		return
@@ -272,11 +234,9 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 func loginUser(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
-
 	if r.Method == http.MethodOptions {
 		return
 	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
 		return
@@ -287,7 +247,6 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ошибка декодирования: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	if user.Email == "" || user.Password == "" {
 		http.Error(w, "Email и пароль не могут быть пустыми", http.StatusBadRequest)
 		return
@@ -328,11 +287,9 @@ func serveAccount(w http.ResponseWriter, r *http.Request) {
 
 func createRoom(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
-
 	if r.Method == http.MethodOptions {
 			return 
 	}
-
 	if r.Method != http.MethodPost {
 			http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
 			return
@@ -343,12 +300,10 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Ошибка декодирования: "+err.Error(), http.StatusBadRequest)
 			return
 	}
-
 	if room.UserID == 0 || room.RoomName == "" {
 			http.Error(w, "ID пользователя и название комнаты не могут быть пустыми", http.StatusBadRequest)
 			return
 	}
-
 	if room.RoomPassword != "" {
 			hash, err := bcrypt.GenerateFromPassword([]byte(room.RoomPassword), bcrypt.DefaultCost)
 			if err != nil {
@@ -364,12 +319,10 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Ошибка при получения Email пользователя: "+err.Error(), http.StatusInternalServerError)
 			return
 	}
-
 	err = db.QueryRow(
 			"INSERT INTO rooms(user_id, room_name, room_password) VALUES($1, $2, $3) RETURNING id",
 			room.UserID, room.RoomName, room.RoomPassword,
 	).Scan(&room.ID)
-
 	if err != nil {
 			http.Error(w, "Ошибка при создании комнаты: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -379,12 +332,10 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 			"INSERT INTO room_users(room_id, user_id, email, role) VALUES($1, $2, $3, $4)",
 			room.ID, room.UserID, userEmail, "owner", 
 	)
-
 	if err != nil {
 			http.Error(w, "Ошибка при добавлении пользователя в комнату: "+err.Error(), http.StatusInternalServerError)
 			return
 	}
-
 	response := map[string]interface{}{
 			"message":  "Комната успешно создана",
 			"roomId":   room.ID,
@@ -398,11 +349,9 @@ func createRoom(w http.ResponseWriter, r *http.Request) {
 
 func joinRoom(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
-
 	if r.Method == http.MethodOptions {
 			return 
 	}
-
 	if r.Method != http.MethodPost {
 			http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
 			return
@@ -414,12 +363,10 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 			UserID       int    `json:"user_id"`
 			UserEmail    string `json:"user_email"`
 	}
-
 	if err := json.NewDecoder(r.Body).Decode(&room); err != nil {
 			http.Error(w, "Ошибка декодирования данных: "+err.Error(), http.StatusBadRequest)
 			return
 	}
-
 	if room.RoomName == "" || room.RoomPassword == "" {
 			http.Error(w, "Название комнаты и пароль не могут быть пустыми", http.StatusBadRequest)
 			return
@@ -429,9 +376,7 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 			ID           int
 			RoomPassword string
 	}
-
 	err := db.QueryRow("SELECT id, room_password FROM rooms WHERE room_name = $1", room.RoomName).Scan(&storedRoom.ID, &storedRoom.RoomPassword)
-
 	if err != nil {
 			if err == sql.ErrNoRows {
 					http.Error(w, "Комната не найдена", http.StatusUnauthorized)
@@ -440,7 +385,6 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Ошибка при получении данных: "+err.Error(), http.StatusInternalServerError)
 			return
 	}
-
 	err = bcrypt.CompareHashAndPassword([]byte(storedRoom.RoomPassword), []byte(room.RoomPassword))
 	if err != nil {
 			http.Error(w, "Неверный пароль", http.StatusUnauthorized)
@@ -449,7 +393,6 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 
 	var userInRoomID int
 	err = db.QueryRow("SELECT user_id FROM room_users WHERE room_id = $1 AND user_id = $2", storedRoom.ID, room.UserID).Scan(&userInRoomID)
-
 	if err == sql.ErrNoRows {
 			_, err = db.Exec("INSERT INTO room_users(room_id, user_id, email, role) VALUES($1, $2, $3, $4)", storedRoom.ID, room.UserID, room.UserEmail, "reader")
 			if err != nil {
@@ -466,14 +409,12 @@ func joinRoom(w http.ResponseWriter, r *http.Request) {
 			"roomId":   storedRoom.ID,
 			"roomName": room.RoomName,
 	}
-
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
 func getRoomUsers(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
-
 	if r.Method == http.MethodOptions {
 		return 
 	}
@@ -483,7 +424,6 @@ func getRoomUsers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Отсутствует ID комнаты", http.StatusBadRequest)
 		return
 	}
-
 	roomId, err := strconv.Atoi(roomIdStr)
 	if err != nil {
 		http.Error(w, "Ошибка изменения ID комнаты: "+err.Error(), http.StatusBadRequest)
@@ -511,9 +451,7 @@ func getRoomUsers(w http.ResponseWriter, r *http.Request) {
 		user.RoomID = roomId
 		users = append(users, user)
 	}
-
 	log.Println("Пользователи в комнате:", users)
-
 	response := map[string]interface{}{
 		"users": users,
 	}
@@ -563,18 +501,15 @@ func updateUserRole(w http.ResponseWriter, r *http.Request) {
 
 func saveDocument(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
-
 	if r.Method == http.MethodOptions {
 		return
 	}
-
 	if r.Method != http.MethodPost {
 		http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var doc Document
-
 	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
 		http.Error(w, "Ошибка декодирования: "+err.Error(), http.StatusBadRequest)
 		return
@@ -587,7 +522,6 @@ func saveDocument(w http.ResponseWriter, r *http.Request) {
 	userIDStr := fmt.Sprintf("%d", doc.UserID)
 
 	var lastVersionNum int
-
 	if err == sql.ErrNoRows {
 		newVersion = fmt.Sprintf("%s.1", userIDStr)
 		lastVersionNum = 1
@@ -596,7 +530,6 @@ func saveDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		parts := strings.Split(lastVersion, ".")
-		
 		if len(parts) == 2 {
 			lastVersionNum, _ = strconv.Atoi(parts[1])
 			newVersion = fmt.Sprintf("%s.%d", userIDStr, lastVersionNum+1)
@@ -620,7 +553,6 @@ func saveDocument(w http.ResponseWriter, r *http.Request) {
 
 func getDocumentVersions(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
-
 	if r.Method == http.MethodOptions {
 		return 
 	}
@@ -631,7 +563,6 @@ func getDocumentVersions(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Некорректный ID комнаты", http.StatusBadRequest)
 		return
 	}
-
 	rows, err := db.Query("SELECT version FROM document_versions WHERE room_id = $1 ORDER BY created_at DESC", roomId)
 	if err != nil {
 		http.Error(w, "Ошибка получения версий документа: "+err.Error(), http.StatusInternalServerError)
@@ -657,7 +588,6 @@ func getDocumentVersions(w http.ResponseWriter, r *http.Request) {
 
 func getDocumentByVersion(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
-
 	if r.Method == http.MethodOptions {
 		return 
 	}
@@ -673,7 +603,6 @@ func getDocumentByVersion(w http.ResponseWriter, r *http.Request) {
 
 	var content string
 	err = db.QueryRow("SELECT content FROM document_versions WHERE room_id = $1 AND version = $2", roomId, version).Scan(&content)
-
 	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, "Ошибка получения текста документа: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -685,7 +614,72 @@ func getDocumentByVersion(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func handleConnection(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	
+	if err != nil {
+		log.Println("Ошибка при установке соединения:", err)
+		return
+	}
 
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Println("Ошибка при закрытии соединения:", err)
+		}
+	}()
+
+	for {
+		messageType, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Ошибка чтения сообщения:", err)
+			break
+		}
+
+		log.Printf("Получено сообщение: %s\n", msg)
+
+		if err := conn.WriteMessage(messageType, msg); err != nil {
+			log.Println("Ошибка отправки сообщения:", err)
+			break 
+		}
+	}
+}
+
+func setCORSHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+}
+
+func handleConnection(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	
+	if err != nil {
+		log.Println("Ошибка при установке соединения:", err)
+		return
+	}
+
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Println("Ошибка при закрытии соединения:", err)
+		}
+	}()
+
+	for {
+		messageType, msg, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Ошибка чтения сообщения:", err)
+			break
+		}
+
+		log.Printf("Получено сообщение: %s\n", msg)
+
+		if err := conn.WriteMessage(messageType, msg); err != nil {
+			log.Println("Ошибка отправки сообщения:", err)
+			break 
+		}
+	}
+}
 
 func main() {
 	initDB()
