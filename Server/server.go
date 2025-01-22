@@ -69,10 +69,30 @@ func initDB() {
 	}
 
 	// clearAllTables()
+
+	initUsersTable()
 	initRoomsTable()
 	initRoomUsersTable()
 	initDocumentVersionsTable()
 }
+
+func initUsersTable() {
+	query := `
+    CREATE TABLE IF NOT EXISTS rooms (
+        id SERIAL PRIMARY KEY,
+				email VARCHAR(255) NOT NULL,
+				password VARCHAR(255) NOT NULL
+    );
+    `
+
+	_, err := db.Exec(query)
+	if err != nil {
+		log.Fatal("Ошибка при создании таблицы users:", err)
+	} else {
+		log.Println("Таблица users успешно создана или уже существует.")
+	}
+}
+
 
 func initRoomsTable() {
 	query := `
@@ -88,7 +108,7 @@ func initRoomsTable() {
 
 	_, err := db.Exec(query)
 	if err != nil {
-		log.Fatal("Ошибка при создании таблицы комнат:", err)
+		log.Fatal("Ошибка при создании таблицы rooms:", err)
 	} else {
 		log.Println("Таблица rooms успешно создана или уже существует.")
 	}
@@ -605,7 +625,7 @@ func getDocumentVersions(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func getDocumentContentByVersion(w http.ResponseWriter, r *http.Request) {
+func getDocumentByVersion(w http.ResponseWriter, r *http.Request) {
 	setCORSHeaders(w)
 
 	if r.Method == http.MethodOptions {
@@ -685,7 +705,7 @@ func main() {
 	http.HandleFunc("/updateUserRole", updateUserRole)
 	http.HandleFunc("/saveDocument", saveDocument)
 	http.HandleFunc("/getDocumentVersions", getDocumentVersions)
-	http.HandleFunc("/getDocumentContentByVersion", getDocumentContentByVersion)
+	http.HandleFunc("/getDocumentByVersion", getDocumentByVersion)
 
 	log.Println("Сервер запущен на порту 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil)) 
