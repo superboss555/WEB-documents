@@ -651,36 +651,6 @@ func setCORSHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 }
 
-func handleConnection(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	
-	if err != nil {
-		log.Println("Ошибка при установке соединения:", err)
-		return
-	}
-
-	defer func() {
-		if err := conn.Close(); err != nil {
-			log.Println("Ошибка при закрытии соединения:", err)
-		}
-	}()
-
-	for {
-		messageType, msg, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Ошибка чтения сообщения:", err)
-			break
-		}
-
-		log.Printf("Получено сообщение: %s\n", msg)
-
-		if err := conn.WriteMessage(messageType, msg); err != nil {
-			log.Println("Ошибка отправки сообщения:", err)
-			break 
-		}
-	}
-}
-
 func main() {
 	initDB()
 	defer db.Close()

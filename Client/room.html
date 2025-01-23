@@ -31,7 +31,7 @@
                     <td class="adminRole">Владелец</td>
                 </tr>
                 <tr class="userRow">
-                    <td class="userName">saka@main.ru</td>
+                    <td class="userName">user@main.ru</td>
                     <td>
                         <select class="userRole">
                             <option value="reader">Читатель</option>
@@ -364,7 +364,7 @@
         async function fetchDocumentByVersion(roomId, version) {
             try {
                 const response = await fetch(
-                    `http://localhost:8080/getDocumentContentByVersion?roomId=${roomId}&version=${version}`
+                    `http://localhost:8080/getDocumentByVersion?roomId=${roomId}&version=${version}`
                 )
 
                 if (response.ok) {
